@@ -1,0 +1,255 @@
+<template>
+    <div class="sw_upload">
+        <view class='sw_upload_img_box'>
+            <view class='clearfix sw_upload_fu_mg'>
+                <view class='sw_upload_img_list' wx:for='{{fileList}}' wx:key="{{index}}" @tap="previewImage({{index}})">
+                    <image src='{{item.filePath}}' mode='aspectFill'></image>
+                    <view class='sw_upload_important_image' wx:if='{{index==0}}'>
+                        <!-- <image wx:if='{{mainImage}}' src='../images/tabbar_icon_like_pre.png' mode='aspectFill'></image> -->
+                    </view>
+                    <view class='sw_upload_progress' wx:if='{{!item.success}}'>
+                        <text>{{(item.progress||0)+'%'}}</text>
+                    </view>
+                    <view class='sw_upload_del_img' wx:if='{{showRemove}}' @tap.stop='removeFile({{index}})'>
+                        <view class='sw_upload_del_radius'>
+                            <i class='iconfont icon-close close'></i>
+                        </view>
+                    </view>
+                </view>
+                <view class="sw_upload_img_list sw_upload_add_upload" @tap='selectFile' wx:if='{{fileList.length<maxNumber&&showAdd}}'>
+                    <i class='iconfont icon-zhaopian zhaopian'></i>
+                    <text>{{description}}</text>
+                </view>
+            </view>
+        </view>
+    </div>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import api from "@/api/api";
+    export default class SwUpload extends wepy.component {
+        props = {
+            fileList: {
+                type: Object,
+                default: [],
+                twoWay: true
+            },
+            // 限制最大上传数量
+            maxNumber: {
+                type: String,
+                default: '9'
+            },
+            // 服务上传接口url
+            action: {
+                type: String,
+                default: 'https://upload-z0.qiniup.com/'
+            },
+            // 添加按钮的文字
+            description: {
+                type: String,
+                default: '添加照片',
+            },
+            // 是否展示主图标志
+            mainImage: {
+                type: String,
+                default: '',
+            },
+            // 是否展示删除图标
+            showRemove: {
+                type: String,
+                default: 'true',
+            },
+            // 是否展示添加图片按钮
+            showAdd: {
+                type: String,
+                default: 'true',
+            }
+        };
+        data = {
+            token: ''
+        };
+        methods = {
+            // 选择文件
+            selectFile() {
+                var count = this.maxNumber - this.fileList.length;
+                if (count == 0) return;
+                wx.chooseImage({
+                    count: count,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: (res) => {
+                        var fileListTemp = res.tempFilePaths;
+                        var fileList = [];
+                        for (var i = 0; i < fileListTemp.length; i++) {
+                            fileList.push({
+                                filePath: fileListTemp[i]
+                            })
+                        }
+                        this.fileList = this.fileList.concat(fileList);
+                        this.methods.submit();
+                    }
+                })
+            },
+            // 上传文件
+            submit: () => {
+                this.methods.uploadImg(this.fileList).then(res => {
+                    res = res.map(it => JSON.parse(it.data))
+                    this.$emit('success', res, this.fileList);
+                })
+            },
+            //   上传图片
+            uploadImg: (paths) => {
+                var upArr = [];
+                paths.map(ph => {
+                    if (ph.flag) return;
+                    // 已上传标记 无论成功或失败
+                    ph.flag = true;
+                    var task = api.wxUploadFile({
+                        url: this.action,
+                        filePath: ph.filePath,
+                        name: 'file',
+                        formData: {
+                            token: this.token
+                        }
+                    }, true)
+                    task.then(res => {
+                        if (res.statusCode == 200) {
+                            ph.response = JSON.parse(res.data);
+                        }
+                        ph.success = true;
+                        this.$apply();
+                    })
+                    task.progress((res) => {
+                        ph.progress = res.progress;
+                        console.log('上传进度', res.progress)
+                        console.log('已经上传的数据长度', res.totalBytesSent)
+                        console.log('预期需要上传的数据总长度', res.totalBytesExpectedToSend)
+                        this.$apply();
+                    })
+                    upArr.push(task)
+                });
+                return Promise.all(upArr);
+            },
+            // 放大图片
+            previewImage(idx) {
+                var paths = this.fileList.map(it => it.filePath);
+                wx.previewImage({
+                    urls: paths,
+                    current: paths[idx]
+                })
+            },
+            // 删除文件
+            removeFile(idx) {
+                var file = this.fileList[idx];
+                this.fileList.splice(idx, 1);
+                this.$emit('removeAfter', file);
+            },
+        };
+        onLoad() {
+            api.getToken().then(res => {
+                console.log('获取新的token:', res);
+                this.token = res.uptoken;
+                this.$apply();
+            })
+        }
+    }
+</script>
+
+<style lang="less">
+    .sw_upload {
+        position: relative;
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            &.close {
+                color: white;
+            }
+            &.zhaopian {
+               font-size: 26px;
+               color:#666666;
+            }
+        }
+        .sw_upload_img_box {
+            width: 100%;
+            .sw_upload_fu_mg {
+                margin-right: -18rpx;
+                margin-bottom: -18rpx;
+            }
+            .sw_upload_important_image {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 64rpx;
+                height: 64rpx;
+                image {
+                    width: 64rpx !important;
+                    height: 64rpx !important;
+                }
+            }
+            .sw_upload_img_list {
+                position: relative;
+                float: left;
+                width: 154rpx;
+                height: 154rpx;
+                margin-top: 20rpx;
+                margin-right: 18rpx;
+                margin-bottom: 18rpx;
+                image {
+                    width: 154rpx;
+                    height: 154rpx;
+                }
+                .sw_upload_del_img {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    padding: 8rpx 8rpx 20rpx 20rpx;
+                    .sw_upload_del_radius {
+                        width: 35rpx;
+                        height: 35rpx;
+                        background: #d11a2d;
+                        border-radius: 50%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    text {
+                        font-size: 16rpx;
+                        color: white;
+                    }
+                }
+                .sw_upload_progress {
+                    position: absolute;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.3);
+                    text {
+                        color: white;
+                    }
+                }
+            }
+            .sw_upload_add_upload {
+                background: #D8D8D8;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                .sw_upload_add_icon {
+                    font-size: 72rpx;
+                    margin-bottom: 0rpx;
+                }
+                text {
+                    color: #666666;
+                }
+            }
+        }
+    }
+</style>

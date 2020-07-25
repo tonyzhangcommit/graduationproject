@@ -1,0 +1,63 @@
+<template>
+    <view class='goods_listbox'>
+        <view class="left_list">
+            <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}">
+                <view class="goods_image">
+                    <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                </view>
+                <view class="goods_text">{{goods_text}}</view>
+                <view class="goods_price">$ {{item.price}}</view>
+                <view class="goods_line"></view>
+                <view class="goodsbox_top">
+                    <view class="avatar">
+                        <image class="image_avatar" src="{{item.image_avatar}}"></image>
+                    </view>
+                    <view class="name_box">
+                        <view class="user_name">{{item.user_name}}</view>
+                        <view class="user_interest">{{item.user_interest}}</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class="right_list">
+            <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}">
+                <view class="goods_image">
+                    <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                </view>
+                <view class="goods_text">{{goods_text}}</view>
+                <view class="goods_price">$ {{item.price}}</view>
+                <view class="goods_line"></view>
+                <view class="goodsbox_top">
+                    <view class="avatar">
+                        <image class="image_avatar" src="{{item.image_avatar}}"></image>
+                    </view>
+                    <view class="name_box">
+                        <view class="user_name">{{item.user_name}}</view>
+                        <view class="user_interest">{{item.user_interest}}</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    export default class Example extends wepy.component {
+        props = {
+          
+        };
+        data = {};
+        components = {};
+        methods = {};
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad() {};
+        onShow() {};
+    }
+</script>
+
+<style lang='scss'>
+
+</style>

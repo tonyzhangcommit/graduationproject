@@ -1,0 +1,246 @@
+<template>
+    <view class='setting_page'>
+        <!-- <view class='cartnone'>
+            <view class="icon">
+                <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+            </view>
+            <view class="tipup_cart">{{empty_tipup}}</view>
+            <view class="tipdown_cart">{{empty_tipdown}}</view>
+        </view> -->
+        <view class='goods_listbox'>
+            <view class="left_list">
+                <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}">
+                    <view class="goods_image">
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.goods_text}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{wxuserinfo.avatarUrl}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.user_name}}</view>
+                            <view class="user_interest">{{item.user_interest}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="right_list">
+                <view class="goods_listinfo" wx:for="{{goods_right_list}}" wx:key="{{index}}">
+                    <view class="goods_image">
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.goods_text}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{wxuserinfo.avatarUrl}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.user_name}}</view>
+                            <view class="user_interest">{{item.user_interest}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import {
+        USER_INFO,
+        USER_SPECICAL_INFO,
+        USER_JWT,
+    } from "@/utils/constant";
+    export default class Example extends wepy.page {
+        config = {
+            navigationBarTitleText: "",
+        };
+        data = {
+            empty_tipup: "",
+            wxuserinfo: {},
+            empty_tipdown: "",
+            goods_left_list: [{
+                    'image_big': "http://pp9lzpzq3.bkt.clouddn.com/CA59FFC3B3C97582F11869BC25EBF245.png",
+                    'goods_text': "健腹轮 宿舍使用",
+                    "price": "20",
+                    "user_name": "北郎",
+                    "user_interest": "令德十二斋",
+                },
+                //     {
+                //       'image_big': "http://pp9lzpzq3.bkt.clouddn.com/3840AD4E2B4658C519A5309DFADDE992.png",
+                //       'goods_text': "书包 电脑包两用",
+                //       "price": "30",
+                //       "user_name": "北郎",
+                //       "user_interest": "令德十二斋",
+                //     },
+            ],
+        };
+        components = {};
+        methods = {};
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad(option) {
+            let user_info = wepy.getStorageSync(USER_INFO);
+            this.wxuserinfo = user_info;
+            wepy.setNavigationBarTitle({
+                title: option.title
+            });
+            this.$apply();
+        }
+    };
+    // onShow() {};
+</script>
+
+<style lang='scss'>
+    .setting_page {
+        width: 100%;
+        height: 100%;
+        .cartnone {
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            .icon_cart {
+                font-size: 160px;
+            }
+            .icon {
+                width: 100%;
+                margin-top: 30%;
+                text-align: center;
+            }
+            .tipup_cart {
+                width: 100%;
+                text-align: center;
+                margin-top: 10rpx;
+                height: 50rpx;
+                font-size: 36rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: #000000;
+                line-height: 50rpx;
+            }
+            .tipdown_cart {
+                width: 100%;
+                text-align: center;
+                margin-top: 10rpx;
+                height: 42rpx;
+                font-size: 30rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: #888888;
+                line-height: 42rpx;
+            }
+        }
+        .goods_listbox {
+            height: 100%;
+            padding: 60rpx 30rpx;
+            justify-content: space-between;
+            background: #FCFCFC;
+            display: flex;
+            flex-wrap: wrap;
+            .left_list {
+                width: 330rpx;
+                display: inline-block;
+            }
+            .right_list {
+                width: 330rpx;
+                display: inline-block;
+            }
+            .goods_listinfo {
+                width: 330rpx;
+                margin-bottom: 30rpx;
+                border-radius: 20rpx;
+                background: white;
+                display: flex;
+                flex-wrap: wrap;
+                .goods_image {
+                    width: 330rpx;
+                    max-height: 600rpx;
+                    border-radius: 20rpx;
+                }
+                .goods_text {
+                    max-height: 80rpx;
+                    padding: 10rpx 0;
+                    white-space: normal;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    width: 100%;
+                    overflow: hidden;
+                    font-size: 30rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 400;
+                    color: #272727;
+                }
+                .goods_price {
+                    height: 60rpx;
+                    font-size: 30rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 500;
+                    color: #EA0000;
+                }
+                .goods_line {
+                    width: 100%;
+                    height: 2rpx;
+                    background: red;
+                }
+                .goodsbox_top {
+                    width: 100%;
+                    height: 100rpx;
+                    align-items: center;
+                    display: flex;
+                    .avatar {
+                        width: 80rpx;
+                        height: 80rpx;
+                        border-radius: 10rpx;
+                        .image_avatar {
+                            width: 80rpx;
+                            height: 80rpx;
+                            border-radius: 10rpx;
+                        }
+                    }
+                    .name_box {
+                        flex-grow: 1;
+                        height: 80rpx;
+                        font-size: 24rpx;
+                        font-family: SFProDisplay-Medium;
+                        font-weight: 500;
+                        color: #000000;
+                        padding-left: 20rpx;
+                        .user_name {
+                            height: 40rpx;
+                            font-size: 26rpx;
+                            white-space: normal;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                        .user_interest {
+                            height: 40rpx;
+                            white-space: normal;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                    .price {
+                        margin-left: 20rpx;
+                        text-align: right;
+                        line-height: 100rpx;
+                        font-size: 40rpx;
+                        font-family: SFProDisplay-Medium;
+                        font-weight: 500;
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+</style>

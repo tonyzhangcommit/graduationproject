@@ -1,0 +1,100 @@
+<template>
+    <view class='select_block'>
+        <view class="select_frame" @tap="select">
+            <view class="select_text">{{select_text}}</view>
+            <view class="select_icon">
+                <i class="iconfont icon-right1 wx:if={{!show_select_item ? 'icon_right_transition':'icon_down_transition'}}"></i>
+            </view>
+        </view>
+        <view class="drop_down" wx:if="{{show_select_item}}">
+            <view class="drop_item" wx:for="{{select_option}}" wx:key="{{index}}" @tap="select_item({{item}})">
+                {{item.name}}
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    export default class Select_Drop extends wepy.component {
+        props = {
+            select_text: {
+                type: String,
+                default: '请选择'
+            },
+            show_select_item: {
+                type: Boolean,
+                default: false
+            },
+            select_option: {
+                type: Array,
+                default: []
+            },
+        };
+        data = {};
+        components = {};
+        methods = {
+            select() {
+                this.show_select_item = !this.show_select_item;
+                this.$apply()
+            },
+            select_item(e) {
+                this.select_text = e.name;
+                this.show_select_item = false;
+                this.$emit('right',this.select_text);
+            }
+        };
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad() {};
+        onShow() {};
+    }
+</script>
+
+<style lang='scss'>
+    .select_block {
+        width: 100%;
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .icon_right_transition {
+            transition: transform 0.3s ease;
+            transform: rotate(0deg);
+        }
+        .icon_down_transition {
+            transition: transform 0.3s ease;
+            transform: rotate(90deg);
+        }
+        .select_frame {
+            height: 60rpx;
+            display: flex;
+            justify-content: space-between;
+            .select_text {
+                font-size: 26rpx;
+                color: #888;
+                line-height: 60rpx;
+                padding: 0 10rpx;
+            }
+            .select_icon {
+                width: 60rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        .drop_down {
+            text-align: right;
+            .drop_item {
+                width: 100%;
+                height: 60rpx;
+                font-size: 26rpx;
+                color: #888;
+            }
+        }
+    }
+</style>

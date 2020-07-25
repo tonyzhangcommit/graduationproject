@@ -1,0 +1,256 @@
+<template>
+    <view class='container'>
+        <view class='goods_listbox' wx:if="{{search_product.length>0}}">
+            <view class="left_list">
+                <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+                    <view class="goods_image">
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.product_name}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{item.owner_image}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.owner_name}}</view>
+                            <view class="user_interest">{{item.owner_location}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="right_list">
+                <view class="goods_listinfo" wx:for="{{goods_right_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+                    <view class="goods_image">
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.product_name}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{item.owner_image}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.owner_name}}</view>
+                            <view class="user_interest">{{item.owner_location}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class='cartnone' wx:if="{{search_product.length==0}}">
+            <view class="icon">
+                <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+            </view>
+            <view class="tipup_cart">没有找到你想要的宝贝呢</view>
+            <view class="tipdown_cart">听说换个搜索词会有不一样的惊喜哦</view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import {
+        USER_INFO,
+        USER_SPECICAL_INFO,
+        USER_JWT,
+    } from "@/utils/constant";
+    import api from "@/api/api";
+    export default class Example extends wepy.page {
+        config = {
+            navigationBarTitleText: "搜索详情",
+        };
+        data = {
+            goods_list: [],
+            goods_left_list: [],
+            goods_right_list: [],
+            search_product: [],
+        };
+        components = {};
+        methods = {
+            goto_goodsinfo(id) {
+                wepy.navigateTo({
+                    url: '/pages/goods_detail?id=' + id
+                });
+            },
+        };
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad(ps) {
+            // 获取首页商品列表
+            api.createProduct().then(res => {
+                this.goods_list = res;
+                if (this.goods_list.length > 0) {
+                    for (var i = 0; i < this.goods_list.length; i++) {
+                        if (this.goods_list[i].product_name.search(ps.title) > -1) {
+                            this.search_product.push(this.goods_list[i])
+                        }
+                    }
+                    if (this.search_product.length > 0) {
+                        for (var j = 0; j < this.search_product.length; j++) {
+                            var imagefirst = this.search_product[j].product_image.split('+')[0];
+                            this.search_product[j].image_big = imagefirst
+                        }
+                        for (var i = 0; i < this.search_product.length; i++) {
+                            if (i % 2 == 0) {
+                                this.goods_left_list.push(this.search_product[i])
+                            } else {
+                                this.goods_right_list.push(this.search_product[i])
+                            }
+                        }
+                    }
+                    this.$apply()
+                }
+            })
+        };
+    }
+</script>
+
+<style lang='scss'>
+    .container {
+        width: 100%;
+        .cartnone {
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            .icon_cart {
+                font-size: 160px;
+            }
+            .icon {
+                width: 100%;
+                margin-top: 30%;
+                text-align: center;
+            }
+            .tipup_cart {
+                width: 100%;
+                text-align: center;
+                margin-top: 10rpx;
+                height: 50rpx;
+                font-size: 36rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: #000000;
+                line-height: 50rpx;
+            }
+            .tipdown_cart {
+                width: 100%;
+                text-align: center;
+                margin-top: 10rpx;
+                height: 42rpx;
+                font-size: 30rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: #888888;
+                line-height: 42rpx;
+            }
+        }
+        .goods_listbox {
+            height: 100%;
+            padding: 60rpx 30rpx;
+            justify-content: space-between;
+            background: #FCFCFC;
+            display: flex;
+            flex-wrap: wrap;
+            .left_list {
+                width: 330rpx;
+                display: inline-block;
+            }
+            .right_list {
+                width: 330rpx;
+                display: inline-block;
+            }
+            .goods_listinfo {
+                width: 330rpx;
+                margin-bottom: 30rpx;
+                border-radius: 20rpx;
+                background: white;
+                display: flex;
+                flex-wrap: wrap;
+                .goods_image {
+                    width: 330rpx;
+                    max-height: 600rpx;
+                    border-radius: 20rpx;
+                }
+                .goods_text {
+                    max-height: 80rpx;
+                    padding: 10rpx 0;
+                    white-space: normal;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    width: 100%;
+                    overflow: hidden;
+                    font-size: 30rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 400;
+                    color: #272727;
+                }
+                .goods_price {
+                    height: 60rpx;
+                    font-size: 30rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 500;
+                    color: #EA0000;
+                }
+                .goods_line {
+                    width: 100%;
+                    height: 2rpx;
+                    background: red;
+                }
+                .goodsbox_top {
+                    width: 100%;
+                    height: 100rpx;
+                    align-items: center;
+                    display: flex;
+                    .avatar {
+                        width: 80rpx;
+                        height: 80rpx;
+                        border-radius: 10rpx;
+                        .image_avatar {
+                            width: 80rpx;
+                            height: 80rpx;
+                            border-radius: 10rpx;
+                        }
+                    }
+                    .name_box {
+                        flex-grow: 1;
+                        height: 80rpx;
+                        font-size: 24rpx;
+                        font-family: SFProDisplay-Medium;
+                        font-weight: 500;
+                        color: #000000;
+                        padding-left: 20rpx;
+                        .user_name {
+                            height: 40rpx;
+                            font-size: 26rpx;
+                            white-space: normal;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                        .user_interest {
+                            height: 40rpx;
+                            white-space: normal;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+                    .price {
+                        margin-left: 20rpx;
+                        text-align: right;
+                        line-height: 100rpx;
+                        font-size: 40rpx;
+                        font-family: SFProDisplay-Medium;
+                        font-weight: 500;
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+</style>

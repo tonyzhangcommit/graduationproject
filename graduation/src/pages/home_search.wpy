@@ -1,0 +1,329 @@
+<template>
+	<view class="home_search">
+		<view class="search_frame">
+			<view class="search_background">
+				<view class='frame_search'>
+					<i class="iconfont icon-icon-search icon_search" />
+				</view>
+				<input1 :value.sync='search_data' type='text' :focus='search_focus' placeholder=' 搜索商品' name="search_data" @confirm.user="input_search"></input1>
+				<view class="clear_input" @tap="clear" wx:if="{{!show}}">
+					<i class="iconfont_clear icon-close" />
+				</view>
+			</view>
+			<view class='cancle' @tap="input_search()">
+				<view class="text">搜索</view>
+			</view>
+		</view>
+		<view class="hot_history_search">
+			<view class='hot_history_search_title'>
+				<view class="title">热门搜索</view>
+			</view>
+			<view class='hot_history_search_classic '>
+				<view class="classic_frame hot_search" wx:for="{{hotsearchlist}}" @tap="hot_search({{item.name}})">{{item.name}}</view>
+			</view>
+		</view>
+		<view class="hot_history_search" wx:if="{{historysearchlist.length>0}}">
+			<view class='hot_history_search_title'>
+				<view class="title">历史搜索</view>
+				<view class='trash' bindtap="delete"><i class="iconfont icon-delete  " /></view>
+			</view>
+			<view class='hot_history_search_classic '>
+				<view class='classic_frame history_search' wx:for="{{historysearchlist}}" @tap="goto_search({{item.name}})">{{item.name}}</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import wepy from "wepy";
+	import SwIput from "@/components/Swinput";
+	export default class Homesearch extends wepy.page {
+		config = {
+			navigationBarTitleText: "搜索",
+			disableScroll: true,
+		};
+		components = {
+			input1: SwIput,
+		};
+		data = {
+			unreadCount: 0,
+			search_focus: true,
+			//自动获取焦点
+			// show:false,
+			// transmission_data:'',
+			search_data: '',
+			hotsearchlist: [{
+					name: "健腹轮",
+				},
+				{
+					name: "宿舍风扇",
+				},
+				{
+					name: "电脑包",
+				},
+			],
+			historysearchlist: [
+				//存放历史搜索记录
+			]
+		};
+		computed = {
+			show() {
+				if (!this.search_data) {
+					return true
+				}
+				return false
+			}
+		};
+		onShow() {}
+		methods = {
+			goto_search(tap) {
+				var obj = {
+					name: tap,
+				};
+				var historysearchlist = wx.getStorageSync('historysearchlist') || [];
+				if (historysearchlist.length == 0) {
+					historysearchlist.unshift(obj);
+				} else if (historysearchlist.length > 0) {
+					for (var i = 0; i < historysearchlist.length; i++) {
+						if (obj.name == historysearchlist[i].name) {
+							historysearchlist.splice(i, 1)
+						}
+					}
+					historysearchlist.unshift(obj);
+				}
+				wepy.navigateTo({
+					url: '/pages/search_info?title=' + tap	
+				});
+				wx.setStorageSync('historysearchlist', historysearchlist);
+				this.historysearchlist = historysearchlist;
+			},
+			hot_search(tap) {
+				var obj = {
+					name: tap,
+				};
+				var historysearchlist = wx.getStorageSync('historysearchlist') || [];
+				if (historysearchlist.length == 0) {
+					historysearchlist.unshift(obj);
+				} else if (historysearchlist.length > 0) {
+					for (var i = 0; i < historysearchlist.length; i++) {
+						if (obj.name == historysearchlist[i].name) {
+							historysearchlist.splice(i, 1)
+						}
+					}
+					historysearchlist.unshift(obj);
+				}
+				wepy.navigateTo({
+					url: '/pages/search_info?title=' + tap
+				});
+				wx.setStorageSync('historysearchlist', historysearchlist);
+				this.historysearchlist = historysearchlist;
+			},
+			clear() {
+				this.search_data = '';
+				refresh: true
+			},
+			input_search() {
+				var value = this.search_data;
+				if (!value) {
+					// wepy.navigateTo({
+					// 	url: "/pages/search"
+					// });
+				} else {
+					var obj = {
+						name: value
+					}
+					var historysearchlist = wx.getStorageSync('historysearchlist') || [];
+					if (historysearchlist.length == 0) {
+						historysearchlist.unshift(obj);
+					} else if (historysearchlist.length > 0) {
+						for (var i = 0; i < historysearchlist.length; i++) {
+							if (obj.name == historysearchlist[i].name) {
+								historysearchlist.splice(i, 1)
+							}
+						}
+						historysearchlist.unshift(obj);
+					}
+					wepy.navigateTo({
+						url: '/pages/search_info?title=' + value
+					});
+					wx.setStorageSync('historysearchlist', historysearchlist);
+					this.historysearchlist = wx.getStorageSync('historysearchlist');
+					this.$apply()
+				}
+			},
+			exit() {
+				this.search_data = '';
+				wepy.swbacknav({
+					delta: 1,
+					refresh: true,
+				})
+			},
+			delete() {
+				wx.showModal({
+					title: '提示',
+					content: '您正在删除历史纪录，确认要删除所有历史纪录？',
+					success: (res) => {
+						if (res.confirm) {
+							let historysearchlist = [];
+							wx.setStorageSync('historysearchlist', historysearchlist)
+							this.historysearchlist = [];
+							this.$apply();
+						} else {
+							console.log('用户点击取消')
+						}
+					}
+				})
+			},
+		};
+		//页面的生命周期函数
+		onLoad() {
+			var historysearchlist = wx.getStorageSync('historysearchlist');
+			this.historysearchlist = historysearchlist;
+		};
+	}
+</script>
+
+
+
+
+<style lang="less">
+	.iconfont {
+		font-family: "iconfont" !important;
+		font-size: 32rpx;
+		font-style: normal;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		color: rgba(136, 136, 136, 1);
+	}
+	.iconfont_clear {
+		font-family: "iconfont" !important;
+		font-size: 38rpx;
+		font-style: normal;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		color: rgba(136, 136, 136, 1);
+	}
+	.search_frame {
+		width: 100%;
+		height: 80rpx;
+		margin-top: 36rpx;
+		display: flex;
+		position: relative;
+		.search_background {
+			margin-left: 32rpx;
+			width: 598rpx;
+			display: flex;
+			position: relative;
+			background: rgba(242, 242, 242, 1);
+			border-radius: 200px;
+			.sw_input {
+				height: 80rpx;
+				width: 75%;
+				.sw-input-placeholder {
+					font-size: 28rpx !important;
+					font-weight: 400;
+					color: rgba(136, 136, 136, 1);
+				}
+				input {
+					font-size: 30rpx !important;
+					font-weight: 400;
+					background: rgba(242, 242, 242, 1);
+					padding: 0rpx 0rpx;
+				}
+			}
+			.clear_input {
+				position: absolute;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 60rpx;
+				height: 70rpx;
+				z-index: 10;
+				font-size: 26rpx;
+				right: 20rpx;
+			}
+			.frame {
+				width: 515rpx;
+				height: 70rpx;
+				background: rgba(242, 242, 242, 1);
+				border-radius: 4rpx 0rpx 0rpx 4rpx;
+				float: left;
+				line-height: 70rpx;
+			}
+			.frame_search {
+				width: 72rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 4rpx 0rpx 0rpx 4rpx;
+				float: left;
+			}
+		}
+		.cancle {
+			width: 120rpx;
+			height: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: absolute;
+			background: #fff;
+			right: 0;
+			.text {
+				font-size: 34rpx;
+				font-family: PingFangSC-Regular;
+				font-weight: 400;
+				color: rgba(209, 26, 45, 1);
+			}
+		}
+	}
+	.hot_history_search {
+		width: 100%;
+		height: 200rpx;
+		padding: 32rpx 34rpx 0rpx 32rpx;
+		position: relative;
+		.hot_history_search_title {
+			height: 42rpx;
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 20rpx;
+			.title {
+				font-size: 30rpx;
+				font-family: PingFangSC-Regular;
+				font-weight: 400;
+				color: rgba(102, 102, 102, 1);
+			}
+			.trash {
+				width: 120rpx;
+			}
+		}
+		.hot_history_search_classic {
+			display: flex;
+			flex-wrap: wrap;
+			.classic_frame {
+				max-width: 660rpx;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				height: 50rpx;
+				border-radius: 200px;
+				margin: 0 20rpx 20rpx 0; //每一项的上下左右间距
+				padding: 0 18rpx 0 20rpx; // 框中字体距离左右的间距
+				align-items: center;
+				display: flex;
+				font-size: 26rpx;
+				font-family: PingFangSC-Regular;
+				font-weight: 400;
+				&.hot_search {
+					color: rgba(209, 26, 45, 1);
+					background: rgba(250, 231, 234, 1);
+				}
+				&.history_search {
+					background: rgba(242, 242, 242, 1);
+					color: #666666;
+				}
+			}
+		}
+	}
+</style>
+
+

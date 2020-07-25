@@ -1,0 +1,381 @@
+<template>
+  <view class='container'>
+    <scroll-view scroll-x scroll-left='{{currentTab*30}}' scroll-with-animation>
+      <view class='top_content' scroll-left='{{currentTab*30}}' scroll-with-animation>
+        <view class="list {{currentTab==index&&'list_active'}}" @tap='getCurrentTab({{index}})' wx:for="{{classiclist}}" wx:key="{{index}}">{{classiclist[index].name}}</view>
+        <view class='list_active_line' style="left:{{currentTab*precent*100+3}}%" wx:if="{{classiclist.length > 0}}"></view>
+      </view>
+    </scroll-view>
+    <view class='goods_listbox' wx:if="{{goods_list.length>0}}">
+      <view class="left_list">
+        <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+          <view class="goods_image">
+            <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+          </view>
+          <view class="goods_text">{{item.product_name}}</view>
+          <view class="goods_price">￥ {{item.price}}</view>
+          <view class="goods_line"></view>
+          <view class="goodsbox_top">
+            <view class="avatar">
+              <image class="image_avatar" src="{{item.owner_image}}"></image>
+            </view>
+            <view class="name_box">
+              <view class="user_name">{{item.owner_name}}</view>
+              <view class="user_interest">{{item.owner_location}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="right_list">
+        <view class="goods_listinfo" wx:for="{{goods_right_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+          <view class="goods_image">
+            <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+          </view>
+          <view class="goods_text">{{item.product_name}}</view>
+          <view class="goods_price">￥ {{item.price}}</view>
+          <view class="goods_line"></view>
+          <view class="goodsbox_top">
+            <view class="avatar">
+              <image class="image_avatar" src="{{item.owner_image}}"></image>
+            </view>
+            <view class="name_box">
+              <view class="user_name">{{item.owner_name}}</view>
+              <view class="user_interest">{{item.owner_location}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class='cartnone' wx:if="{{goods_list.length==0}}">
+      <view class="icon">
+        <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+      </view>
+      <view class="tipup_cart">这个品类下空空如也呢</view>
+      <view class="tipdown_cart">快去看看其他品类吧</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import {
+    USER_INFO,
+    USER_SPECICAL_INFO,
+    USER_JWT,
+  } from "@/utils/constant";
+  import api from "@/api/api";
+  export default class Classic extends wepy.page {
+    config = {
+      navigationBarTitleText: "商品分类",
+    };
+    data = {
+      wxuserinfo: {},
+      currentTab: 0,
+      precent: 0,
+      categoryinfo: [],
+      index: 0,
+      classiclist: [{
+          'src': "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1554729150&di=bca029eeb462f3b7f457fb0175d4150b&imgtype=jpg&er=1&src=http%3A%2F%2Fimg.sccnn.com%2Fbimg%2F338%2F16332.jpg",
+          'name': '健身器材',
+          'indexs': 0
+        },
+        {
+          'src': "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1554729200&di=0f780b275b94e97fe4fdee8594ab9b21&imgtype=jpg&er=1&src=http%3A%2F%2Fimgsrc.baidu.com%2Fimgad%2Fpic%2Fitem%2Fd31b0ef41bd5ad6e70bf4e778bcb39dbb7fd3cec.jpg",
+          'name': '专业书籍',
+          'indexs': 1
+        },
+        {
+          'src': "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1554729300&di=cb839582829e49b6755ea003662ef278&imgtype=jpg&er=1&src=http%3A%2F%2Fimg02.tooopen.com%2Fdowns%2Fimages%2F2010%2F7%2F19%2Fsy_20100719214427917122.jpg",
+          'name': '宿舍电器',
+          'indexs': 2
+        },
+        {
+          'src': "http://www.tianqi.com/images/0-18-1.jpg",
+          'name': '各式衣服',
+          'indexs': 3
+        },
+        {
+          'src': "http://img4.imgtn.bdimg.com/it/u=1435345231,1893023499&fm=26&gp=0.jpg",
+          'name': '美妆捡漏',
+          'indexs': 4,
+        },
+        {
+          'src': "http://img1.imgtn.bdimg.com/it/u=104912722,1998917757&fm=26&gp=0.jpg",
+          'name': '游戏代练',
+          'indexs': 5
+        },
+        {
+          'src': "http://i1.sinaimg.cn/dy/o/2011-08-08/1312765001_35op79.jpg",
+          'name': '大四甩卖',
+          'indexs': 6
+        },
+        {
+          'src': "http://wx3.sinaimg.cn/wap720/006ij2XRgy1fcum9d5wunj310x0kujsg.jpg",
+          'name': '其他',
+          'indexs': 7
+        },
+      ],
+      goods_list: [],
+      goods_left_list: [],
+      goods_right_list: [],
+    };
+    components = {};
+    methods = {
+      getCurrentTab(cur) {
+        this.goods_list = [];
+        this.goods_left_list = [];
+        this.goods_right_list = [];
+        this.currentTab = cur;
+        this.precent = (1 / this.classiclist.length);
+        this.$apply()
+        for (var i = 0; i < this.classiclist.length; i++) {
+          if (this.classiclist[i].indexs == this.currentTab) {
+            for (var j = 0; j < this.categoryinfo.length; j++) {
+              if (this.categoryinfo[j].name == this.classiclist[i].name) {
+                this.goods_list = this.categoryinfo[j].product_category;
+                if (this.goods_list.length > 0) {
+                  for (var k = 0; k < this.goods_list.length; k++) {
+                    var imagefirst = this.goods_list[k].product_image.split('+')[0];
+                    this.goods_list[k].image_big = imagefirst
+                    if (k % 2 == 0) {
+                      this.goods_left_list.push(this.goods_list[k])
+                    } else {
+                      this.goods_right_list.push(this.goods_list[k])
+                    }
+                  }
+                }
+                this.$apply()
+              }
+            }
+          }
+        }
+        this.$apply()
+      },
+      goto_goodsinfo(id) {
+        wepy.navigateTo({
+          url: '/pages/goods_detail?id=' + id
+        });
+      },
+    };
+    events = {};
+    watch = {};
+    computed = {};
+    onLoad(ps) {
+      let user_info = wepy.getStorageSync(USER_INFO);
+      this.wxuserinfo = user_info;
+      api.getProductClassic().then(res => {
+        this.categoryinfo = res;
+        for (var i = 0; i < this.categoryinfo.length; i++) {
+          if (this.categoryinfo[i].name == ps.title) {
+            this.goods_list = this.categoryinfo[i].product_category;
+            if (this.goods_list.length > 0) {
+              for (var j = 0; j < this.goods_list.length; j++) {
+                var imagefirst = this.goods_list[j].product_image.split('+')[0];
+                this.goods_list[j].image_big = imagefirst
+                this.goods_left_list = [];
+                this.goods_right_list = [];
+                if (j % 2 == 0) {
+                  this.goods_left_list.push(this.goods_list[j])
+                } else {
+                  this.goods_right_list.push(this.goods_list[j])
+                }
+              }
+            }
+            this.$apply()
+          }
+        }
+      })
+      for (var i = 0; i < this.classiclist.length; i++) {
+        if (this.classiclist[i].name == ps.title) {
+          this.currentTab = this.classiclist[i].indexs;
+          this.index = this.currentTab;
+          this.precent = (1 / this.classiclist.length);
+        }
+        this.$apply()
+      }
+    };
+    onShow() {};
+  }
+</script>
+
+<style lang='scss'>
+  .container {
+    width: 100%;
+    height: 100%;
+    .cartnone {
+      width: 100%;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      .icon_cart {
+        font-size: 160px;
+      }
+      .icon {
+        width: 100%;
+        margin-top: 30%;
+        text-align: center;
+      }
+      .tipup_cart {
+        width: 100%;
+        text-align: center;
+        margin-top: 10rpx;
+        height: 50rpx;
+        font-size: 36rpx;
+        font-family: PingFangSC-Regular;
+        font-weight: 400;
+        color: #000000;
+        line-height: 50rpx;
+      }
+      .tipdown_cart {
+        width: 100%;
+        text-align: center;
+        margin-top: 10rpx;
+        height: 42rpx;
+        font-size: 30rpx;
+        font-family: PingFangSC-Regular;
+        font-weight: 400;
+        color: #888888;
+        line-height: 42rpx;
+      }
+    }
+    .top_content {
+      // width: 100%;
+      position: relative;
+      padding: 10rpx 0rpx 10rpx 0rpx;
+      display: inline-flex;
+      background: white;
+      height: 80rpx;
+      .list {
+        width: 150rpx;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 30rpx;
+        font-family: PingFangSC-Medium;
+        font-weight: 500;
+        color: rgba(102, 102, 102, 1);
+      }
+      .list.long_tab_box {
+        width: 205rpx;
+      }
+      .list_active {
+        color: #d11a2d;
+      }
+      .list_active_line {
+        position: absolute;
+        bottom: 10rpx;
+        left: 0;
+        height: 4rpx;
+        width: 80rpx;
+        border-radius: 4rpx;
+        background: #d11a2d;
+        transition: left 0.3s;
+        z-index: 1;
+      }
+    }
+    .goods_listbox {
+      height: 100%;
+      padding: 60rpx 30rpx;
+      justify-content: space-between;
+      background: #FCFCFC;
+      display: flex;
+      flex-wrap: wrap;
+      .left_list {
+        width: 330rpx;
+        display: inline-block;
+      }
+      .right_list {
+        width: 330rpx;
+        display: inline-block;
+      }
+      .goods_listinfo {
+        width: 330rpx;
+        margin-bottom: 30rpx;
+        border-radius: 20rpx;
+        background: white;
+        display: flex;
+        flex-wrap: wrap;
+        .goods_image {
+          width: 330rpx;
+          max-height: 600rpx;
+          border-radius: 20rpx;
+        }
+        .goods_text {
+          max-height: 80rpx;
+          padding: 10rpx 0;
+          white-space: normal;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          width: 100%;
+          overflow: hidden;
+          font-size: 30rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 400;
+          color: #272727;
+        }
+        .goods_price {
+          height: 60rpx;
+          font-size: 30rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 500;
+          color: #EA0000;
+        }
+        .goods_line {
+          width: 100%;
+          height: 2rpx;
+          background: red;
+        }
+        .goodsbox_top {
+          width: 100%;
+          height: 100rpx;
+          align-items: center;
+          display: flex;
+          .avatar {
+            width: 80rpx;
+            height: 80rpx;
+            border-radius: 10rpx;
+            .image_avatar {
+              width: 80rpx;
+              height: 80rpx;
+              border-radius: 10rpx;
+            }
+          }
+          .name_box {
+            flex-grow: 1;
+            height: 80rpx;
+            font-size: 24rpx;
+            font-family: SFProDisplay-Medium;
+            font-weight: 500;
+            color: #000000;
+            padding-left: 20rpx;
+            .user_name {
+              height: 40rpx;
+              font-size: 26rpx;
+              white-space: normal;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .user_interest {
+              height: 40rpx;
+              white-space: normal;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+          .price {
+            margin-left: 20rpx;
+            text-align: right;
+            line-height: 100rpx;
+            font-size: 40rpx;
+            font-family: SFProDisplay-Medium;
+            font-weight: 500;
+            color: red;
+          }
+        }
+      }
+    }
+  }
+</style>

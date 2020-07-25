@@ -1,0 +1,534 @@
+<template>
+    <view class='setting_page'>
+        <view class='cartnone' wx:if="{{goods_list_empty&&part_page=='我发布的'}}">
+            <view class="icon">
+                <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+            </view>
+            <view class="tipup_cart">{{empty_tipup}}</view>
+            <view class="tipdown_cart">{{empty_tipdown}}</view>
+        </view>
+        <view class='goods_listbox' wx:if="{{!goods_list_empty&&part_page=='我发布的'}}">
+            <view class="manage_list">
+                <view class="button_mange" @tap="managegoods">{{!manage_goods?'管理':'删除'}}</view>
+            </view>
+            <view class="left_list">
+                <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}" @tap="selectproduct({{item}})">
+                    <view class="goods_image">
+                        <view class="edit_goods" wx:if="{{manage_goods}}">
+                            <i class="iconfont icon-finish edit_icon" wx:if="{{thisgoodsname===item.product_name}}"></i>
+                        </view>
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.product_name}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{item.owner_image}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.owner_name}}</view>
+                            <view class="user_interest">{{item.owner_location}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="right_list">
+                <view class="goods_listinfo" wx:for="{{goods_right_list}}" wx:key="{{index}}" @tap="selectproduct({{item}})">
+                    <view class="goods_image">
+                        <view class="edit_goods" wx:if="{{manage_goods}}">
+                            <i class="iconfont icon-finish edit_icon" wx:if="{{thisgoodsname===item.product_name}}"></i>
+                        </view>
+                        <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+                    </view>
+                    <view class="goods_text">{{item.product_name}}</view>
+                    <view class="goods_price">￥ {{item.price}}</view>
+                    <view class="goods_line"></view>
+                    <view class="goodsbox_top">
+                        <view class="avatar">
+                            <image class="image_avatar" src="{{item.owner_image}}"></image>
+                        </view>
+                        <view class="name_box">
+                            <view class="user_name">{{item.owner_name}}</view>
+                            <view class="user_interest">{{item.owner_location}}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <view class='cartnone' wx:if="{{part_page=='我的留言'&&user_message.length==0}}">
+            <view class="icon">
+                <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+            </view>
+            <view class="tipup_cart">呀，这里空空如也呢</view>
+            <view class="tipdown_cart">快去发布商品试试吧</view>
+        </view>
+        <view class="massage_people" wx:for="{{user_message}}" wx:key="{{index}}" wx:if="{{part_page=='我的留言'&&user_message.length>0}}">
+            <view class="massage_name">
+                <view class="people_image">
+                    <image class="people_image" src="{{item.otherimage}}"></image>
+                </view>
+                <view class="people_name">{{item.othername}}</view>
+                <view class="edit_button {{is_reply?'isreply':''}}" @tap="goto_message({{item.otherid}})">{{is_reply?'已回复':'回复他'}}</view>
+            </view>
+            <Swinput1 maxlength="80" placeholder='最多可以回复40个字哦' :value.sync='message_info'></Swinput1>
+            <view class="massage_info">
+                {{item.massage_info}}
+            </view>
+        </view>
+        <view class="control_massage" wx:if="{{part_page=='修改权限'}}">
+            <view class="control_text">隐藏个人信息？</view>
+            <view class="edit_goods" @tap="hide_userdata()">
+                <i class="iconfont icon-finish edit_icon" wx:if="{{!is_showdata}}"></i>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import {
+        USER_INFO,
+        USER_SPECICAL_INFO,
+        USER_JWT,
+    } from "@/utils/constant";
+    import tip from "@/utils/tip";
+    import Input from '@/components/Swinput';
+    import api from "@/api/api";
+    export default class Example extends wepy.page {
+        config = {
+            navigationBarTitleText: "搜索",
+        };
+        data = {
+            empty_tipup: "",
+            wxuserinfo: {},
+            empty_tipdown: "",
+            user_message: [],
+            goods_list: [],
+            goods_left_list: [],
+            goods_right_list: [],
+            goods_list_empty: true,
+            part_page: '',
+            manage_goods: false,
+            select_goods: {},
+            thisgoodsname: '',
+            message_info: '',
+            is_reply: false,
+            is_showdata: true,
+        };
+        components = {
+            Swinput1: Input, // 留言信息
+        };
+        methods = {
+            managegoods() {
+                if (!this.manage_goods) {
+                    this.manage_goods = true;
+                } else {
+                    wx.showModal({
+                        title: '提示',
+                        content: "确认删除所选商品？",
+                        success: (res) => {
+                            if (res.confirm) {
+                                api.createProduct({
+                                    id: this.select_goods.id,
+                                    method: "delete"
+                                })
+                                api.wxuserinfo({
+                                    id: this.wxuserinfo.id
+                                }).then(res => {
+                                    if (res) {
+                                        this.goods_list = res.myproduct;
+                                        if (this.goods_list.length > 0) {
+                                            this.goods_list_empty = false;
+                                            this.goods_left_list = [];
+                                            this.goods_right_list = [];
+                                            for (var j = 0; j < this.goods_list.length; j++) {
+                                                var imagefirst = this.goods_list[j].product_image.split('+')[0];
+                                                this.goods_list[j].image_big = imagefirst
+                                            }
+                                            for (var i = 0; i < this.goods_list.length; i++) {
+                                                if (i % 2 == 0) {
+                                                    this.goods_left_list.push(this.goods_list[i])
+                                                } else {
+                                                    this.goods_right_list.push(this.goods_list[i])
+                                                }
+                                            }
+                                        } else {
+                                            this.goods_list_empty = true;
+                                        }
+                                        this.$apply()
+                                    }
+                                })
+                            } else {
+                                console.log('用户点击取消')
+                            }
+                        }
+                    })
+                }
+                this.$apply()
+            },
+            selectproduct(tap) {
+                if (this.manage_goods) {
+                    this.thisgoodsname = tap.product_name;
+                    this.select_goods = tap;
+                    this.$apply()
+                }
+            },
+            goto_message(tap) {
+                if (this.is_reply) {
+                    tip.alert("已经回复过了哦")
+                }
+                if (this.message_info) {
+                    var params = {
+                        'otherid': this.wxuserinfo.id,
+                        'othername': this.wxuserinfo.name,
+                        'otherimage': this.wxuserinfo.image,
+                        'massage_info': this.message_info,
+                        'owner': tap,
+                    }
+                    api.createMessage({
+                        query: params,
+                        method: "post"
+                    }).then(res => {
+                        this.is_reply = true;
+                        this.$apply()
+                        tip.toast("回复成功");
+                    })
+                } else {
+                    tip.alert("请输入回复内容")
+                }
+            },
+            hide_userdata() {
+                wx.showModal({
+                    title: '提示',
+                    content: "隐藏之后别人就看不到你的用户信息了，确认隐藏？",
+                    success: (res) => {
+                        if (res.confirm) {
+                            var params = {
+                                'is_showinfo': false,
+                            }
+                            api.edituserinfo({
+                                id: this.wxuserinfo.id,
+                                query: params,
+                                method: "put"
+                            }).then(res => {
+                                this.is_showdata = false;
+                                this.$apply()
+                                tip.success("已隐藏")
+                            })
+                        } else {
+                            console.log('用户点击取消')
+                        }
+                    }
+                })
+            }
+        };
+        computed = {};
+        onLoad(option) {
+            wepy.setNavigationBarTitle({
+                title: option.title
+            });
+            this.part_page = option.title;
+            let empty_page = {
+                "我发布的": {
+                    tip_up: "你还没有发布商品呢",
+                    tip_down: '快去分布闲置商品吧！',
+                },
+                "我的留言": {
+                    tip_up: "你还没有收到留言呢",
+                    tip_down: '再去完善下资料，让大家更好的了解你呀！',
+                },
+            }
+            if (option.title != "修改权限") {
+                this.empty_tipup = empty_page[option.title].tip_up;
+                this.empty_tipdown = empty_page[option.title].tip_down;
+            }
+            this.$apply();
+        }
+        onShow() {
+            let user_info = wepy.getStorageSync(USER_INFO);
+            this.wxuserinfo = user_info;
+            this.no_login = false;
+            api.wxuserinfo({
+                id: this.wxuserinfo.id
+            }).then(res => {
+                if (res) {
+                    // 更新缓存
+                    this.wxuserinfo = res;
+                    this.user_message = res.user_massage;
+                    wx.removeStorageSync(USER_INFO)
+                    wepy.setStorageSync(USER_INFO, res);
+                    this.goods_list = res.myproduct;
+                    if (this.goods_list.length > 0) {
+                        for (var j = 0; j < this.goods_list.length; j++) {
+                            var imagefirst = this.goods_list[j].product_image.split('+')[0];
+                            this.goods_list[j].image_big = imagefirst
+                        }
+                        this.goods_list_empty = false;
+                        this.goods_left_list = [];
+                        this.goods_right_list = [];
+                        for (var i = 0; i < this.goods_list.length; i++) {
+                            if (i % 2 == 0) {
+                                this.goods_left_list.push(this.goods_list[i])
+                            } else {
+                                this.goods_right_list.push(this.goods_list[i])
+                            }
+                        }
+                    }
+                    this.$apply()
+                }
+            })
+        };
+    };
+</script>
+
+<style lang='scss'>
+    .iconfont {
+        font-family: "iconfont" !important;
+        font-size: 16px;
+        font-style: normal;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        &.edit_icon {
+            color: #fff;
+            font-size: 18px;
+        }
+    }
+    .cartnone {
+        width: 100%;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        .icon_cart {
+            font-size: 160px;
+        }
+        .icon {
+            width: 100%;
+            margin-top: 30%;
+            text-align: center;
+        }
+        .tipup_cart {
+            width: 100%;
+            text-align: center;
+            margin-top: 10rpx;
+            height: 50rpx;
+            font-size: 36rpx;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: #000000;
+            line-height: 50rpx;
+        }
+        .tipdown_cart {
+            width: 100%;
+            text-align: center;
+            margin-top: 10rpx;
+            height: 42rpx;
+            font-size: 30rpx;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: #888888;
+            line-height: 42rpx;
+        }
+    }
+    .goods_listbox {
+        height: 100%;
+        padding: 60rpx 30rpx;
+        justify-content: space-between;
+        background: #FCFCFC;
+        display: flex;
+        flex-wrap: wrap;
+        .left_list {
+            width: 330rpx;
+            display: inline-block;
+        }
+        .right_list {
+            width: 330rpx;
+            display: inline-block;
+        }
+        .manage_list {
+            width: 100%;
+            height: 60rpx;
+            margin-bottom: 30rpx;
+            display: flex;
+            justify-content: flex-end;
+            .button_mange {
+                width: 80rpx;
+                height: 100%;
+                background: #6A6AFF;
+                font-size: 28rpx;
+                color: white;
+                text-align: center;
+                line-height: 60rpx;
+                border-radius: 20rpx;
+            }
+        }
+        .goods_listinfo {
+            width: 330rpx;
+            margin-bottom: 30rpx;
+            border-radius: 20rpx;
+            background: white;
+            display: flex;
+            flex-wrap: wrap;
+            .goods_image {
+                width: 330rpx;
+                max-height: 600rpx;
+                border-radius: 20rpx;
+                position: relative;
+                .edit_goods {
+                    position: absolute;
+                    width: 50rpx;
+                    height: 50rpx;
+                    background: red;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 20;
+                    right: 20rpx;
+                    top: 20rpx;
+                }
+            }
+            .goods_text {
+                max-height: 80rpx;
+                padding: 10rpx 0;
+                white-space: normal;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                width: 100%;
+                overflow: hidden;
+                font-size: 30rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: #272727;
+            }
+            .goods_price {
+                height: 60rpx;
+                font-size: 30rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 500;
+                color: #EA0000;
+            }
+            .goods_line {
+                width: 100%;
+                height: 2rpx;
+                background: red;
+            }
+            .goodsbox_top {
+                width: 100%;
+                height: 100rpx;
+                align-items: center;
+                display: flex;
+                .avatar {
+                    width: 80rpx;
+                    height: 80rpx;
+                    border-radius: 10rpx;
+                    .image_avatar {
+                        width: 80rpx;
+                        height: 80rpx;
+                        border-radius: 10rpx;
+                    }
+                }
+                .name_box {
+                    flex-grow: 1;
+                    height: 80rpx;
+                    font-size: 24rpx;
+                    font-family: SFProDisplay-Medium;
+                    font-weight: 500;
+                    color: #000000;
+                    padding-left: 20rpx;
+                    .user_name {
+                        height: 40rpx;
+                        font-size: 26rpx;
+                        white-space: normal;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .user_interest {
+                        height: 40rpx;
+                        white-space: normal;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+                .price {
+                    margin-left: 20rpx;
+                    text-align: right;
+                    line-height: 100rpx;
+                    font-size: 40rpx;
+                    font-family: SFProDisplay-Medium;
+                    font-weight: 500;
+                    color: red;
+                }
+            }
+        }
+    }
+    .massage_people {
+        width: 100%;
+        min-height: 200rpx;
+        box-sizing: border-box;
+        padding-left: 32rpx;
+        .massage_name {
+            height: 100rpx;
+            display: flex;
+            align-items: center;
+            .people_image {
+                width: 100rpx;
+                height: 100rpx;
+                border-radius: 50%;
+            }
+            .people_name {
+                min-width: 200rpx;
+                height: 100%;
+                line-height: 100rpx;
+            }
+            .edit_button {
+                height: 64%;
+                width: 80px;
+                background: #6A6AFF;
+                font-size: 28rpx;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 20rpx;
+                margin-left: 80px;
+                &.isreply {
+                    background: gray;
+                }
+            }
+        }
+        .massage_info {
+            margin-top: 40rpx;
+            font-size: 32rpx;
+            padding: 0 20rpx;
+            min-height: 100rpx;
+        }
+    }
+    .control_massage {
+        box-sizing: border-box;
+        padding: 0 32rpx;
+        width: 100%;
+        height: 80rpx;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #6A6AFF;
+        .control_text {
+            width: 60%;
+            font-size: 30rpx;
+            color: white;
+        }
+        .edit_goods {
+            width: 60rpx;
+            height: 60rpx;
+            border-radius: 50%;
+            background: red;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+    }
+</style>

@@ -1,0 +1,687 @@
+<template>
+    <view class='edit_userdata'>
+        <view class="userimg_box">
+            <view class="image_box">
+                <view class="up_bigbox">
+                    <view class="upbig_left" @tap="upload_image1()">
+                        <view class="add_num">
+                            <i class="iconfont add_image icon-jiahao" />
+                        </view>
+                        <image class="image_inside" src="{{user_image1}}"> </image>
+                    </view>
+                    <view class="upbig_right">
+                        <view class="upbig_rightup" @tap="upload_image2()">
+                            <view class="add_num">
+                                <i class="iconfont add_image icon-jiahao" />
+                            </view>
+                            <image class="image_inside" src="{{user_image2}}"> </image>
+                        </view>
+                        <view class="upbig_rightup" style="margin-top:22rpx;" @tap="upload_image3()">
+                            <view class="add_num">
+                                <i class="iconfont add_image icon-jiahao" />
+                            </view>
+                            <image class="image_inside" src="{{user_image3}}"> </image>
+                        </view>
+                    </view>
+                </view>
+                <view class="down_bigbox">
+                    <view class="down_smallimage" @tap="upload_image4()">
+                        <view class="add_num">
+                            <i class="iconfont add_image icon-jiahao" />
+                        </view>
+                        <image class="image_inside" src="{{user_image4}}"> </image>
+                    </view>
+                    <view class="down_smallimage" @tap="upload_image5()">
+                        <view class="add_num">
+                            <i class="iconfont add_image icon-jiahao" />
+                        </view>
+                        <image class="image_inside" src="{{user_image5}}"> </image>
+                    </view>
+                    <view class="down_smallimage" @tap="upload_image6()">
+                        <view class="add_num">
+                            <i class="iconfont add_image icon-jiahao" />
+                        </view>
+                        <image class="image_inside" src="{{user_image6}}"> </image>
+                    </view>
+                </view>
+            </view>
+            <view class="tip_image">
+                <view class="tip_imagetext">长按可拖动图片，单击可删除图片</view>
+                <view class="tip_imagetext">请上传真实图片，以便大家更好的了解你呀</view>
+            </view>
+        </view>
+        <view class="user_infodata">
+            <view class="infodata_title">基本信息</view>
+            <view class="blockbox">
+                <view class="title">真实姓名</view>
+                <Swinput1 maxlength="40" placeholder='请输入真实姓名（必填）' :value.sync='true_name'></Swinput1>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="title">个人名言</view>
+                <Swinput2 maxlength="100" placeholder='用一句话介绍你自己吧' :value.sync='true_motto'></Swinput2>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="title">性别</view>
+                <SelectSex :select_option.sync="select_sexlist" :select_text.sync="select_tiptext" @right.user="seclectsex"></SelectSex>
+            </view>
+            <view class="blockbox">
+                <view class="title">身高</view>
+                <Swinput3 maxlength="20" placeholder='请输入身高' type='number' rule='number' :value.sync='true_height'></Swinput3>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="title">年龄</view>
+                <Swinput4 maxlength="6" placeholder='请输入年龄' type='number' rule='number' :value.sync='true_age'></Swinput4>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="part_inside">
+                    <view class='part_title'>生日:</view>
+                    <picker mode="date" value="{{date}}" start="{{earlydate}}" end="{{todays}}" bindchange="bindDateChange" style="display:flex;">
+                        <view style="position:relative;display:flex; font-size:30rpx;">
+                            <view style="position:absolute;width:110rpx;display:flex;flex-direction:row-reverse;">{{dateArr[0]}}年</view>
+                            <view style="position:absolute;left:110rpx;width:100rpx;display:flex;flex-direction:row-reverse;">{{dateArr[1]}}月</view>
+                            <view style="position:absolute;left:220rpx;width:100rpx;display:flex;flex-direction:row-reverse;">{{dateArr[2]}}日</view>
+                        </view>
+                    </picker>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="title">学校</view>
+                <SelectSchool :select_option.sync="select_schoollist" :select_text.sync="select_tipschool" @right.user="seclectschool"></SelectSchool>
+            </view>
+            <view class="blockbox">
+                <view class="title">宿舍楼</view>
+                <SelectDormroom :select_option.sync="select_dormlist" :select_text.sync="select_tipdormroom" @right.user="seclectdorm"></SelectDormroom>
+            </view>
+            <view class="blockbox">
+                <view class="title">家乡</view>
+                <Swinput5 maxlength="100" placeholder='我来自哪里呀' :value.sync='true_hometown'></Swinput5>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <view class="title">所属学院</view>
+                <SelectCollege :select_option.sync="select_collegelist" :select_text.sync="select_tipcollege" @right.user="seclectcollege"></SelectCollege>
+            </view>
+            <view class="blockbox">
+                <view class="title">学号</view>
+                <Swinput6 maxlength="60" placeholder='学号（必填）' type='number' rule='number' :value.sync='school_number'></Swinput6>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+        </view>
+        <view class="user_infodata">
+            <view class="infodata_title">我的日常</view>
+            <view class="blockbox">
+                <Swinput7 maxlength="100" placeholder='比如图书馆' :value.sync='user_daily1'></Swinput7>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <Swinput8 maxlength="100" placeholder='比如图书馆' :value.sync='user_daily2'></Swinput8>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <Swinput9 maxlength="100" placeholder='比如图书馆' :value.sync='user_daily3'></Swinput9>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+        </view>
+        <view class="user_infodata">
+            <view class="infodata_title">我的兴趣</view>
+            <view class="blockbox">
+                <Swinput10 maxlength="100" placeholder='比如参加竞赛？' :value.sync='user_interest1'></Swinput10>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <Swinput11 maxlength="100" placeholder='比如图书馆' :value.sync='user_interest2'></Swinput11>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+            <view class="blockbox">
+                <Swinput12 maxlength="100" placeholder='比如图书馆' :value.sync='user_interest3'></Swinput12>
+                <view class="iconright">
+                    <i class="iconfont icon-right1"></i>
+                </view>
+            </view>
+        </view>
+        <view class="release_info" @tap="goto_release()">
+            确认发布
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    import Input from '@/components/Swinput';
+    import moment from 'moment';
+    import Select from '@/components/select_drop';
+    import api from "@/api/api";
+    import {
+        USER_INFO,
+        USER_SPECICAL_INFO,
+        USER_JWT,
+    } from "@/utils/constant";
+    export default class Edit_Userdata extends wepy.page {
+        config = {
+            navigationBarTitleText: "修改资料",
+        };
+        data = {
+            token: '', //上传七牛云所需得token
+            base_imageurl: 'http://pqxf267y5.bkt.clouddn.com/',
+            user_image1: '',
+            user_image2: '',
+            user_image3: '',
+            user_image4: '',
+            user_image5: '',
+            user_image6: '',
+            user_daily1: '',
+            user_daily2: '',
+            user_daily3: '',
+            user_interest1: '',
+            user_interest2: '',
+            user_interest3: '',
+            wxuserinfo: {},
+            select_sex: '',
+            select_school: '',
+            select_dorm: '',
+            select_college: '',
+            select_tiptext: '请选择性别',
+            select_tipschool: '请选择学校（必填）',
+            select_tipdormroom: '请选择宿舍楼（必填）',
+            select_tipcollege: '请选择所在学院（必填）',
+            date: '',
+            true_name: '', //真实姓名
+            true_motto: '', //个人名言
+            true_age: '', //年龄
+            true_hometown: '', //家乡
+            school_number: '', //学号
+            true_height: '', //身高
+            earlydate: '',
+            today: '',
+            select_sexlist: [{
+                    name: "男",
+                    sex_number: "1",
+                },
+                {
+                    name: "女",
+                    sex_number: "0",
+                },
+            ],
+            select_schoollist: [{
+                    name: "山西大学",
+                },
+                {
+                    name: "太原理工大学",
+                },
+                {
+                    name: "山西财经大学",
+                },
+            ],
+            select_dormlist: [{
+                    name: "令德十二",
+                },
+                {
+                    name: "令德十三",
+                },
+                {
+                    name: "令德十四",
+                },
+            ],
+            select_collegelist: [{
+                    name: "计算机与信息技术学院",
+                },
+                {
+                    name: "软件工程",
+                },
+                {
+                    name: "物电学院",
+                },
+                {
+                    name: "美术学院",
+                },
+            ]
+        };
+        components = {
+            SelectSex: Select,
+            SelectSchool: Select,
+            SelectDormroom: Select,
+            SelectCollege: Select,
+            Swinput1: Input, // 真实姓名
+            Swinput2: Input, //个人名言
+            Swinput3: Input, //身高
+            Swinput4: Input, //年龄
+            Swinput5: Input, //家乡
+            Swinput6: Input, //学号
+            Swinput7: Input, //用户日常
+            Swinput8: Input, //用户日常
+            Swinput9: Input, //用户日常
+            Swinput10: Input, //用户兴趣
+            Swinput11: Input, //用户兴趣
+            Swinput12: Input, //用户兴趣
+        };
+        // 上传图片至七牛云
+        async uploadImg(src) {
+            const json = await api.wxUploadFile({
+                url: 'https://upload-z0.qiniup.com/',
+                filePath: src,
+                name: 'file',
+                formData: {
+                    token: this.token
+                }
+            })
+            if (json) {
+                let a = JSON.parse(json.data)
+                let image = a.key
+                return image
+            }
+        };
+        methods = {
+            upload_image1() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image1 = this.base_imageurl + res;
+                        debugger
+                        this.$apply();
+                    })
+                });
+            },
+            upload_image2() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image2 = this.base_imageurl + res;
+                        this.$apply();
+                    })
+                });
+            },
+            upload_image3() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image3 = this.base_imageurl + res;
+                        this.$apply();
+                    })
+                });
+            },
+            upload_image4() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image4 = this.base_imageurl + res;
+                        this.$apply();
+                    })
+                });
+            },
+            upload_image5() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image5 = this.base_imageurl + res;
+                        this.$apply();
+                    })
+                });
+            },
+            upload_image6() {
+                wepy.chooseImage({
+                    count: '1', //最多可以选择的图片张数,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: res => {}, //返回图片的本地文件路径列表 tempFilePaths,
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let img = res.tempFilePaths[0];
+                    this.uploadImg(img).then(res => {
+                        this.user_image6 = this.base_imageurl + res;
+                        this.$apply();
+                    })
+                });
+            },
+            seclectsex(e) {
+                if (e == "男") {
+                    this.select_sex = "1";
+                } else {
+                    this.select_sex = "0";
+                }
+                this.$apply()
+            },
+            seclectschool(e) {
+                this.select_school = e;
+                this.$apply()
+            },
+            seclectdorm(e) {
+                this.select_dorm = e;
+                this.$apply()
+            },
+            seclectcollege(e) {
+                this.select_college = e;
+                this.$apply()
+            },
+            goto_release() {
+                if (!this.userdate_botton) {
+                    wx.showModal({
+                        title: '提示',
+                        content: "别心急哈，还有必选项没有填完全哦",
+                        success: (res) => {
+                            if (res.confirm) {
+                                debugger
+                                return
+                            } else {
+                                console.log('用户点击取消')
+                            }
+                        }
+                    })
+                }
+                var params = {
+                    "name": this.true_name,
+                    "birthday": this.date,
+                    "age": this.true_age,
+                    "gender": this.select_sex,
+                    "school_number": this.school_number,
+                    "human_height": this.true_height,
+                    "school": this.select_school,
+                    "home": this.true_hometown,
+                    "profession": this.select_college,
+                    "location_house": this.select_dorm,
+                    "info": this.true_motto,
+                    "user_image": this.user_image,
+                    "user_interest": this.user_interest,
+                    "user_daily": this.user_daily,
+                    "user_massage": []
+                }
+                api.edituserinfo({
+                    id: this.wxuserinfo.id,
+                    query: params,
+                    method: "put"
+                }).then(res => {
+                    debugger
+                    wepy.navigateBack({
+                      delta: 2 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+                    });
+                    
+                })
+            },
+            bindDateChange: function(e) {
+                this.date = e.detail.value;
+            },
+        };
+        events = {};
+        watch = {};
+        computed = {
+            user_daily() {
+                return this.user_daily1 + "+" + this.user_daily2 + "+" + this.user_daily3
+            },
+            user_interest() {
+                return this.user_interest1 + "+" + this.user_interest2 + "+" + this.user_interest3
+            },
+            user_image() {
+                return this.user_image1 + "+" + this.user_image2 + "+" + this.user_image3 + "+" + this.user_image4 + "+" + this.user_image5 + "+" + this.user_image6
+            },
+            userdate_botton() {
+                if (!this.true_name) return false;
+                if (!this.true_motto) return false;
+                if (!this.select_sex) return false;
+                if (!this.date) return false;
+                if (!this.true_height) return false;
+                if (!this.true_age) return false;
+                if (!this.select_school) return false;
+                if (!this.select_dorm) return false;
+                if (!this.true_hometown) return false;
+                if (!this.select_college) return false;
+                if (!this.school_number) return false;
+                return true;
+            },
+            dateArr() {
+                if (!this.date) return ['', '', ''];
+                return this.date.split('-');
+            },
+        };
+        onLoad() {
+            var dateNow = new Date();
+            var date_today = moment(dateNow).format('YYYY-MM-DD');
+            this.earlydate = "1980-01-01";
+            this.today = date_today;
+            api.getToken().then(res => {
+                this.token = res.uptoken;
+                this.$apply();
+            })
+            this.$apply()
+        };
+        onShow() {
+            let userjwt = wepy.getStorageSync(USER_JWT);
+            let user_info = wepy.getStorageSync(USER_INFO);
+            this.wxuserinfo = user_info;
+        };
+    }
+</script>
+
+<style lang='scss'>
+    .iconfont {
+        font-family: "iconfont" !important;
+        font-size: 16px;
+        font-style: normal;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        &.add_image {
+            font-size: 28px;
+            color: #E0E0E0;
+        }
+    }
+    .sw_input {
+        height: 60rpx;
+        width: 100%;
+        line-height: 60rpx;
+        .sw-input-placeholder {
+            font-size: 26rpx;
+            color: #888;
+        }
+        input {
+            height: 100%;
+            width: 80%;
+            padding: 0rpx 20rpx;
+            background: rgba(255, 255, 255, 1);
+        }
+    }
+    .edit_userdata {
+        background: #f9f9f9;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        .userimg_box {
+            margin-top: 20rpx;
+            padding: 30rpx;
+            background: rgba(255, 255, 255, 1);
+            .image_box {
+                .image_inside {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 20rpx;
+                    z-index: 90;
+                }
+                .add_num {
+                    width: 60rpx;
+                    height: 60rpx;
+                    position: absolute;
+                }
+                display: flex;
+                flex-wrap: wrap;
+                .up_bigbox {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    .upbig_left {
+                        width: 440rpx;
+                        height: 440rpx;
+                        border-radius: 20rpx;
+                        background: #F0F0F0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .upbig_right {
+                        .upbig_rightup {
+                            width: 210rpx;
+                            height: 210rpx;
+                            background: #F0F0F0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 20rpx;
+                        }
+                    }
+                }
+                .down_bigbox {
+                    display: flex;
+                    width: 100%;
+                    margin-top: 30rpx;
+                    justify-content: space-between;
+                    .down_smallimage {
+                        width: 210rpx;
+                        height: 210rpx;
+                        background: #F0F0F0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 20rpx;
+                    }
+                }
+            }
+            .tip_image {
+                background: white;
+                margin-top: 2rpx;
+                padding-top: 20rpx;
+                .tip_imagetext {
+                    width: 100%;
+                    text-align: center;
+                    font-size: 20rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 400;
+                    color: rgba(136, 136, 136, 1);
+                }
+            }
+        }
+        .user_infodata {
+            width: 100%;
+            padding: 0 30rpx;
+            background: white;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 30rpx;
+            .infodata_title {
+                width: 100%;
+                height: 60rpx;
+                line-height: 60rpx;
+                font-size: 24rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: rgba(136, 136, 136, 1);
+            }
+            .blockbox {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20rpx;
+                .part_inside {
+                    display: flex;
+                    position: relative;
+                    .part_title {
+                        font-size: 30rpx;
+                        font-family: PingFangSC-Regular;
+                        font-weight: 400;
+                        color: rgba(0, 0, 0, 1);
+                        width: 126rpx;
+                    }
+                }
+                .title {
+                    width: 160rpx;
+                    height: 100%;
+                    line-height: 60rpx;
+                    font-size: 30rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 400;
+                    color: #000000;
+                }
+                .data_info {
+                    width: 65%;
+                    font-size: 32rpx;
+                    font-family: PingFangSC-Regular;
+                    font-weight: 400;
+                    color: rgba(0, 0, 0, 1);
+                }
+                .iconright {
+                    width: 60rpx; // height: 100%;
+                }
+            }
+        }
+        .release_info {
+            width: 70%;
+            height: 80rpx;
+            border-radius: 30rpx;
+            background: #6A6AFF;
+            text-align: center;
+            line-height: 80rpx;
+            color: #fff;
+            margin-bottom: 60rpx;
+            margin-top: 60rpx;
+        }
+    }
+</style>

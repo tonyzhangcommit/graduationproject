@@ -1,0 +1,282 @@
+
+<template>
+  <view>
+    <view class="usercenter" wx:if="{{!no_login}}">
+      <view class="header">
+        <view class="user_image">
+          <image class="user_img" src="{{wxuserinfo.image}}"></image>
+        </view>
+        <view class="header_right">
+          <view class="user_name">{{wxuserinfo.nickname}}</view>
+          <view class="edit_info" @tap="goto_edit()">查看/编辑资料</view>
+        </view>
+      </view>
+      <view class="user_tab" @tap="goto_release({{release}})">
+        <view class="user_tableft">
+          <view class="icon_setting">
+            <i class="iconfont icon-xianzhifabu set_title"></i>
+          </view>
+          <view class="text_tabname">{{release}}</view>
+        </view>
+        <view class="icon_arrow">
+          <i class="iconfont icon-right1"></i>
+        </view>
+      </view>
+      <!-- <view class="user_tab" @tap="goto_sell({{me_sell}})">
+                <view class="user_tableft">
+                  <view class="icon_setting">
+                    <i class="iconfont icon-rongquanmaichu set_title"></i>
+                  </view>
+                  <view class="text_tabname">{{me_sell}}</view>
+                </view>
+                <view class="icon_arrow">
+                  <i class="iconfont icon-right1"></i>
+                </view>
+              </view> -->
+      <!-- <view class="user_tab" @tap="goto_buy({{me_buy}})">
+                <view class="user_tableft">
+                  <view class="icon_setting">
+                    <i class="iconfont icon-yigoumai set_title"></i>
+                  </view>
+                  <view class="text_tabname">{{me_buy}}</view>
+                </view>
+                <view class="icon_arrow">
+                  <i class="iconfont icon-right1"></i>
+                </view>
+              </view> -->
+      <view class="user_tab" @tap="goto_message({{me_message}})">
+        <view class="user_tableft">
+          <view class="icon_setting">
+            <i class="iconfont icon-likefill set_title"></i>
+          </view>
+          <view class="text_tabname">{{me_message}}</view>
+        </view>
+        <view class="icon_arrow">
+          <i class="iconfont icon-right1"></i>
+        </view>
+      </view>
+      <view class="user_tab" @tap="goto_setting()">
+        <view class="user_tableft">
+          <view class="icon_setting">
+            <i class="iconfont icon-shezhi set_title"></i>
+          </view>
+          <view class="text_tabname">个人设置</view>
+        </view>
+        <view class="icon_arrow">
+          <i class="iconfont icon-right1"></i>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{no_login}}">
+      <placeholder :show.sync="no_login" type="no_login" title="您还没有登陆无法进行操作" message="快去登陆再来看看吧"></placeholder>
+      <view class="btn_view">
+        <view class="login_button" @tap="toLogin">立即登录</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Placeholder from '@/components/placeholder';
+  import {
+    USER_INFO,
+    USER_SPECICAL_INFO,
+    USER_JWT,
+  } from "@/utils/constant";
+  import api from "@/api/api";
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '个人中心'
+    }
+    components = {
+      placeholder: Placeholder,
+    }
+    data = {
+      no_login: false,
+      release: "我发布的",
+      me_buy: "我买到的",
+      me_sell: "我卖出的",
+      me_message: "我的留言",
+      wxuserinfo: {}, //微信基本信息
+    }
+    computed = {}
+    methods = {
+      toLogin() {
+        wepy.navigateTo({
+          url: "/pages/wx_login"
+        });
+      },
+      goto_edit() {
+        wepy.navigateTo({
+          url: '/pages/show_userdata'
+        });
+      },
+      goto_release(tip) {
+        wepy.navigateTo({
+          url: '/pages/setting_page?title=' + tip
+        });
+      },
+      goto_sell(tip) {
+        wepy.navigateTo({
+          url: '/pages/setting_page?title=' + tip
+        });
+      },
+      goto_buy(tip) {
+        wepy.navigateTo({
+          url: '/pages/setting_page?title=' + tip
+        });
+      },
+      goto_message(tip) {
+        wepy.navigateTo({
+          url: '/pages/setting_page?title=' + tip
+        });
+      },
+      goto_setting(tip) {
+        wepy.navigateTo({
+          url: '/pages/setting_page?title=' + '修改权限'
+        });
+      },
+    }
+    events = {}
+    onLoad() {}
+    onShow() {
+      let userjwt = wepy.getStorageSync(USER_JWT);
+      let user_info = wepy.getStorageSync(USER_INFO);
+      this.wxuserinfo = user_info;
+      if (userjwt) {
+        this.no_login = false;
+        api.wxuserinfo({
+          id: this.wxuserinfo.id
+        }).then(res => {
+          if (res) {
+            // 更新缓存
+            this.wxuserinfo = res;
+            wx.removeStorageSync(USER_INFO)
+            wepy.setStorageSync(USER_INFO, res);
+            this.$apply()
+          }
+        })
+      } else {
+        this.no_login = true;
+      }
+      this.$apply()
+    }
+  }
+</script>
+
+<style lang="less">
+  .usercenter {
+    width: 100%;
+    background: #F0F0F0;
+    .iconfont {
+      font-family: "iconfont" !important;
+      font-size: 16px;
+      font-style: normal;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      &.set_title {
+        font-size: 22px;
+        color: #7B7B7B;
+      }
+    }
+    .header {
+      height: 300rpx;
+      padding: 20rpx 40rpx;
+      display: flex;
+      align-items: center;
+      background: white;
+      .user_image {
+        width: 200rpx;
+        height: 200rpx;
+        border-radius: 50%;
+        .user_img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+        }
+      }
+      .header_right {
+        height: 200rpx;
+        background: white;
+        width: 400rpx;
+        padding-left: 40rpx;
+        .user_name {
+          margin-top: 40rpx;
+          width: 100%;
+          height: 60rpx;
+          font-size: 40rpx;
+          font-family: SFProDisplay-Medium;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 1);
+        }
+        .edit_info {
+          width: 180rpx;
+          height: 60rpx;
+          text-align: center;
+          background: #6A6AFF;
+          border-radius: 10rpx;
+          line-height: 60rpx;
+          font-size: 26rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 1);
+        }
+      }
+    }
+    .user_tab {
+      margin-top: 4rpx;
+      height: 80rpx;
+      display: flex;
+      justify-content: space-between;
+      background: white;
+      padding: 0 40rpx;
+      .user_tableft {
+        width: 45%;
+        display: flex; // justify-content: space-between;
+        .icon_setting {
+          width: 60rpx;
+          height: 100%;
+          line-height: 80rpx;
+          text-align: left;
+        }
+        .text_tabname {
+          width: 65%;
+          line-height: 80rpx;
+          font-size: 32rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+      .icon_arrow {
+        width: 80rpx;
+        height: 100%;
+        line-height: 80rpx;
+        text-align: right;
+      }
+    }
+  }
+  .empty-placeholder {
+    top: 20%;
+  }
+  .btn_view {
+    position: absolute;
+    bottom: 23%;
+    height: 80rpx;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    .login_button {
+      background: rgba(209, 26, 45, 1);
+      height: 80rpx;
+      width: 80%;
+      font-size: 36rpx;
+      line-height: 80rpx;
+      font-family: PingFangSC-Medium;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 1);
+      text-align: center;
+    }
+  }
+</style>

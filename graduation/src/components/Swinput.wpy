@@ -1,0 +1,206 @@
+<template>
+  <view class="sw_input">
+    <textarea wx:if="{{textarea}}" auto-height='{{true}}' value="{{value}}" maxlength="{{maxlength}}" disabled='{{disabled}}' bindinput='bindKeyInput' placeholder="{{placeholder}}" />
+    <input wx:else type='{{type}}' value="{{value}}" maxlength="{{maxlength}}" bindfocus='bindfocus' focus='{{focus}}' disabled='{{disabled}}' placeholder-class='sw-input-placeholder' bindinput='bindKeyInput' bindconfirm='bindconfirm' placeholder="{{placeholder}}"
+      bindblur='blur' />
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class SwIput extends wepy.component {
+    data = {
+      imgurl: '',
+      bkPlaceholder: '',
+      fixed: true
+    }
+    props = {
+      // 输入框类型
+      type: {
+        type: String,
+        default: 'text'
+      },
+      //可输入最大长度
+      maxlength: {
+        type: String,
+        default: '140'
+      },
+      //可输入最大字符长度
+      maxByteLength: {
+        type: String,
+        default: ''
+      },
+      //输入最大值  type需为 |number|allNumber|
+      maxNumber:{
+        type: String,
+        default: ''
+      },
+      // 值
+      value: {
+        type: String,
+        default: '',
+        twoWay: true
+      },
+      placeholder: String,
+      // 是否为textarea
+      textarea: {
+        type: String,
+        default: ''
+      },
+      // rule 现取值列表：price|number|allNumber|
+      rule: {
+        type: String,
+        default: ''
+      },
+      // 是否禁用
+      disabled: {
+        type: Boolean,
+        default: false
+      },
+      //自动获取焦点
+      focus: {
+        type: Boolean,
+        default: false
+      }
+    }
+    methods = {
+      bindfocus() {
+        // if(this.placeholder){
+        //   this.bkPlaceholder = this.placeholder;
+        // }
+        // this.placeholder = '';
+      },
+      blur(e) {
+        // this.placeholder = this.bkPlaceholder;
+        // 失去焦点 格式化为双数点格式
+        if (this.rule == 'price' && this.value) {
+          this.value = parseFloat(this.value).toFixed(2);
+        }
+
+        // 字符长度校验 一个汉字两个字符
+        if(this.maxByteLength){
+          this.value = this.setByteLen(this.value,this.maxByteLength)
+        }
+      },
+      bindconfirm(e) {
+        // console.log(1321313131113313)
+        // debugger
+        this.$emit('confirm', e);
+      },
+      bindKeyInput(e) {
+        var value = e.detail.value;
+        if (this.rule == 'price') {
+          // 去除非数字和点    将所有连续点化为单点 如 .... >  .
+          value = value.replace(/[^\d\.]/g, '').replace(/\.+/g, '.');
+          // 第一位为 .  前加0
+          if (/^\./.test(value)) value = '0' + value;
+          // 大于一位数 并且第二位不为. 并且开头为0  例：0010
+          if (value.length > 1 && value[1] !== '.' && value[0] == 0) {
+            if (/^0+$/.test(value)) {
+              // 如果全为0  例 00000  还是给它留一个0吧
+              value = '0';
+            } else {
+              //去除开头0
+              value = value.replace(/^0+/, '');
+            }
+          }
+          if (value.indexOf('.')) {
+            value = value.replace(/(^\d+\.\d{0,2}).*/, '$1');
+          }
+        } else if (this.rule == 'number') {
+          // 去除非数字   去除所以开头0
+          value = value.replace(/[^\d]/g, '').replace(/^0+/, '');
+          value = value;
+        } else if (this.rule === 'allNumber') {
+          // 去除非数字 
+          value = value.replace(/[^\d]/g, '');
+          value = value;
+        } else if (this.rule == 'idcard'){
+          // 身份证验证
+          value = value.replace(/[^\dXx]/g, '').replace(/x/g,'X');
+          value = value.replace(/\BX\B/g, '');
+          value = value;
+        }
+        // 字符长度校验 一个汉字两个字符
+        if(this.maxByteLength){
+          value = this.setByteLen(value,this.maxByteLength);
+        }
+
+        if(this.maxNumber&&(this.type=='allNumber'||this.type=='number')){
+          value = parseInt(value)>parseInt(this.maxNumber)?this.maxNumber:value;
+        }
+
+        this.value = value;
+        // this.$apply();
+        this.$emit('value', this.value,this.getByteLen(value));
+        return value;
+      }
+    }
+    checkByteLen(){
+      
+    }
+
+    /**
+     * 设置字符长度
+     */
+    setByteLen(str,length){
+      var len = 0;
+      var value = '';
+      for (var i = 0; i < str.length; i++) {
+        var a = str.charAt(i);
+        if (a.match(/[^\x00-\xff]/ig) != null) {
+          len += 2;
+        } else {
+          len += 1;
+        }
+        if(len<=length){
+          value+=str[i];
+        }else{
+          break;
+        }
+      }
+
+      return value;
+    }
+    /**
+     * 获取字符串字符个数
+     */
+    getByteLen(val) {
+      var len = 0;
+      for (var i = 0; i < val.length; i++) {
+        var a = val.charAt(i);
+        if (a.match(/[^\x00-\xff]/ig) != null) {
+          len += 2;
+        } else {
+          len += 1;
+        }
+      }
+      return len;
+    }
+    onLoad() {}
+  }
+</script>
+
+<style lang="less">
+  .sw_input {
+    height: 100%;
+    width: 100%;
+    .sw-input-placeholder {
+      font-size: 26rpx;
+      color: #888;
+    }
+    input {
+      height: 100%;
+      width: 100%;
+      background: rgba(249, 249, 249, 0.8);
+      padding: 4rpx 20rpx;
+    }
+    textarea {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10rpx 20rpx;
+      background: rgba(249, 249, 249, 0.8);
+    }
+  }
+</style>

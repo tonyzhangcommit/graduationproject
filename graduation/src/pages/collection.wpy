@@ -1,0 +1,224 @@
+<template>
+  <view>
+    <view class='collection' wx:if="{{collect_list.length>0}}">
+      <view class="collection_list" wx:for="{{collect_list}}" wx:key="{{index}}" @tap="goto_goodsdetail({{item.productid}})">
+        <view class="box_top">
+          <view class="avatar">
+            <image class="image_avatar" src="{{item.product_ownerimage}}"></image>
+          </view>
+          <view class="name_box">
+            <view class="user_name">{{item.product_owner}}</view>
+            <view class="user_interest">{{item.product_userinfo}}</view>
+          </view>
+          <view class="price">￥ {{item.product_price}}</view>
+        </view>
+        <view class="image_box">
+          <view class="image_info" wx:for="{{item.product_image}}">
+            <image class="image_info" mode="aspectFill" src="{{item}}"></image>
+          </view>
+        </view>
+        <view class="introduction">
+          {{item.product_name}}
+        </view>
+        <view class="line_gray"></view>
+        <view class="edit_collection">
+          <view class="from_info">{{item.product_house}}</view>
+          <view class="edit_box">
+            <view class="icon_edit">
+              <i class="iconfont icon-shoucang collect"></i>
+            </view>
+            <view class="edit_text" @tap.stop="exit_collect({{item.id}})">取消收藏</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class='cartnone' wx:if="{{collect_list.length==0}}">
+      <view class="icon">
+        <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+      </view>
+      <view class="tipup_cart">你还没有收藏任何商品呢</view>
+      <view class="tipdown_cart">快去首页随意逛逛吧</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import {
+    USER_INFO,
+    USER_SPECICAL_INFO,
+    USER_JWT,
+  } from "@/utils/constant";
+  import CartNone from '@/components/cartnone';
+  import api from "@/api/api";
+  export default class Example extends wepy.page {
+    config = {
+      navigationBarTitleText: "我的收藏",
+    };
+    data = {
+      wxuserinfo: {},
+      is_none: false,
+      collect_list: [],
+    };
+    components = {
+      CartNone
+    };
+    methods = {
+      goto_goodsdetail(id) {
+        wepy.navigateTo({
+          url: '/pages/goods_detail?id=' + id
+        });
+      },
+      exit_collect(tap) {
+        wx.showModal({
+          title: '提示',
+          content: "确认取消收藏商品？",
+          success: (res) => {
+            if (res.confirm) {
+              api.collectProduct({
+                id: tap,
+                method: "delete"
+              })
+            } else {
+              console.log('用户点击取消')
+            }
+          }
+        })
+      }
+    };
+    events = {};
+    watch = {};
+    computed = {};
+    onLoad() {};
+    onShow() {
+      let user_info = wepy.getStorageSync(USER_INFO);
+      this.wxuserinfo = user_info;
+      this.collect_list = this.wxuserinfo.user_collection;
+      if (this.collect_list.length > 0) {
+        for (var i = 0; i < this.collect_list.length; i++) {
+          this.collect_list[i].product_image = this.collect_list[i].product_image.split('+');
+        }
+      }
+      this.$apply()
+    };
+  }
+</script>
+
+<style lang='scss'>
+  .iconfont {
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    &.collect {
+      color: #FFBD9D;
+    }
+  }
+  .collection {
+    width: 100%;
+    height: 100%;
+    background: #f9f9f9;
+    .collection_list {
+      background: white;
+      margin: 30rpx 0;
+      padding: 30rpx 30rpx 0 30rpx;
+      .box_top {
+        height: 100rpx;
+        display: flex;
+        .avatar {
+          width: 100rpx;
+          border-radius: 10rpx;
+          .image_avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 10rpx;
+          }
+        }
+        .name_box {
+          font-size: 24rpx;
+          font-family: SFProDisplay-Medium;
+          font-weight: 500;
+          color: #000000;
+          padding-left: 30rpx;
+          .user_name {
+            margin-top: 20rpx;
+            font-size: 26rpx;
+          }
+          .user_interest {}
+        }
+        .price {
+          margin-left: 20rpx;
+          text-align: right;
+          line-height: 100rpx;
+          font-size: 40rpx;
+          font-family: SFProDisplay-Medium;
+          font-weight: 500;
+          color: red;
+        }
+      }
+      .image_box {
+        height: 200rpx;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30rpx;
+        .image_info {
+          width: 220rpx;
+          height: 100%;
+          background: gray;
+          border-radius: 20rpx;
+        }
+      }
+      .introduction {
+        margin-top: 30rpx;
+        width: 100%;
+        height: 100rpx;
+        word-wrap: break-word;
+        word-break: normal;
+        font-family: SFProDisplay-Medium;
+        font-weight: 500;
+        font-size: 30rpx;
+        color: #000000;
+      }
+      .line_gray {
+        width: 100%;
+        height: 2rpx;
+        background: #E0E0E0;
+      }
+      .edit_collection {
+        height: 100rpx;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .from_info {
+          height: 100%;
+          line-height: 100rpx;
+          color: #6A6AFF;
+          font-size: 26rpx;
+          font-family: PingFangSC-Medium;
+          font-weight: 600;
+        }
+        .edit_box {
+          height: 60%;
+          width: 180rpx;
+          display: flex;
+          .icon_edit {
+            width: 60rpx;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .edit_text {
+            line-height: 60rpx;
+            color: #ff7575;
+            font-size: 26rpx;
+            font-family: PingFangSC-Medium;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+</style>

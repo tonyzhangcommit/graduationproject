@@ -1,0 +1,65 @@
+
+<template>
+    <view class='container'>
+        <!-- <view class="input_frame"> -->
+        <view class="ipt-box">
+            <textarea disabled="{{disablePower2}}" maxlength='200' value='{{description}}' bindinput='bindKeyInput' placeholder="把你想说的话留言给他/她吧！" />
+        </view>
+        <!-- </view> -->
+        <view class="send_botton">
+            发送留言
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    export default class Messageborder extends wepy.page {
+        config = {
+            navigationBarTitleText: "留言板",
+        };
+        data = {};
+        components = {};
+        methods = {};
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad() {};
+        onShow() {};
+    }
+</script>
+
+<style lang='scss'>
+    .container {
+        height: 500rpx;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        position: relative;
+        .ipt-box {
+            width: 100%;
+            position: absolute;
+            top: 0;
+            height: 60rpx;
+            padding: 12rpx;
+            background: #f9f9f9;
+            textarea {
+                min-height: 40rpx;
+                width: 100%;
+                background: #f9f9f9; // padding: 12rpx;
+                box-sizing: border-box;
+            }
+        }
+        .send_botton {
+            width: 70%;
+            height: 80rpx;
+            border-radius: 30rpx;
+            background: #6A6AFF;
+            text-align: center;
+            line-height: 80rpx;
+            color: #fff;
+            position: absolute;
+            bottom: 0;
+        }
+    }
+</style>

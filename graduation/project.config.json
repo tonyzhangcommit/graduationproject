@@ -1,0 +1,92 @@
+{
+	"description": "大学生二手物品交易",
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true,
+		"nodeModules": false,
+		"autoAudits": false,
+		"uglifyFileName": false,
+		"checkInvalidKey": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wxf7ae0e9c9cccb92b",
+	"projectname": "%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1",
+	"miniprogramRoot": "dist/",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"libVersion": "2.6.6",
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"list": []
+		},
+		"miniprogram": {
+			"current": -1,
+			"list": [
+				{
+					"id": -1,
+					"name": "个人中心",
+					"pathName": "pages/info",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "修改资料",
+					"pathName": "pages/edit_userdata",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "我的收藏",
+					"pathName": "pages/collection",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "商品详情",
+					"pathName": "pages/goods_detail",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "上传商品页面",
+					"pathName": "pages/release_goods",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "设置页面",
+					"pathName": "pages/setting_page",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "编辑资料",
+					"pathName": "pages/edit_userdata",
+					"query": "",
+					"scene": null
+				}
+			]
+		}
+	}
+}

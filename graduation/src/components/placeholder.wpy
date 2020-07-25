@@ -1,0 +1,63 @@
+<template>
+  <view class="empty-placeholder" wx:if="{{show}}">
+    <i class="iconfont {{typeMap[type]?typeMap[type]:'icon-liebiaokongzhuangtai'}}"></i>
+    <view class="title">{{title}}</view>
+    <view class="txt">{{message}}</view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Placeholder extends wepy.component {
+    props = {
+      show: {
+        type: Boolean,
+        default: false
+      },
+      message: {
+        default: '快去随便逛逛吧'
+      },
+      title: {
+        default: "还没有您关注的商品"
+      },
+      type: {
+        default: ""
+      }
+    };
+    data = {
+      typeMap:{
+        'history':'icon-liulanjilu_kongzhuangtai',
+        'voucher':'icon-youhuiquankongzhuangtai',
+        'no_login':'icon-weidenglu'
+      }
+    }
+  }
+</script>
+<style lang="less">
+  .empty-placeholder {
+    width: 100%;
+    top: 300rpx;
+    text-align: center;
+    position: absolute;
+    .txt {
+      margin-top: 10rpx;
+      height: 42rpx;
+      font-size: 30rpx;
+      font-family: PingFangSC-Regular;
+      font-weight: 400;
+      color: rgba(136, 136, 136, 1);
+      line-height: 42rpx;
+    }
+    .title {
+      margin-top: 10rpx;
+      height: 50rpx;
+      font-size: 36rpx;
+      font-family: PingFangSC-Regular;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 1);
+      line-height: 50rpx;
+    }
+    i {
+      font-size: 160px;
+    }
+  }
+</style>

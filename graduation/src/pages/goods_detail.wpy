@@ -1,0 +1,351 @@
+<template>
+    <view class="goods_box">
+        <view class='goods_detail'>
+            <view class="box_top">
+                <view class="avatar">
+                    <image class="image_avatar" src="{{goods_data.owner_image}}"></image>
+                </view>
+                <view class="name_box">
+                    <view class="user_name">{{goods_data.owner_name}}</view>
+                    <view class="user_interest">{{goods_data.owner_location}}</view>
+                </view>
+            </view>
+            <view class="line_gray"></view>
+            <view class="price_text_img">
+                <view class="price_box">￥{{goods_data.price}}</view>
+                <view class="text_box">
+                    <text class="detailed_introduct">{{goods_data.remark}} </text>
+                    <view class="deal_way">交易方式:{{goods_data.trading_method}}</view>
+                </view>
+                <view class="image_box">
+                    <image class="image_box" mode="widthFix" wx:for="{{goods_data.product_image}}" wx:key="{{item}}" src="{{item}}" wx:if="{{item}}"></image>
+                </view>
+                <view class="blank" style="width:100%;height:200rpx;background:white;"></view>
+            </view>
+            <view class="bottom_exit">
+                <view class="exit_infobox">
+                    <view class="exit_info" @tap="addlikegoods()">
+                        <view class="font">
+                            <i class="iconfont icon-praise_icon exit_iconfont" wx:if="{{!is_addlike}}"></i>
+                            <i class="iconfont icon-praise2 exit_iconfont" style=" color: rgba(209, 26, 45, 1);" wx:if="{{is_addlike}}"></i>
+                        </view>
+                        <view class="exit_text {{is_addlike?'red_text':''}}">超赞</view>
+                    </view>
+                    <view class="exit_info" @tap="gotomessage()">
+                        <view class="font">
+                            <i class="iconfont icon-liuyan exit_iconfont"></i>
+                        </view>
+                        <view class="exit_text">留言</view>
+                    </view>
+                    <view class="exit_info" @tap="collect_goods()">
+                        <view class="font">
+                            <i class="iconfont icon-like exit_iconfont" wx:if="{{!is_collect}}"></i>
+                            <i class="iconfont icon-xihuan1 exit_iconfont" wx:if="{{is_collect}}" style=" color: rgba(209, 26, 45, 1);"></i>
+                        </view>
+                        <view class="exit_text {{is_collect?'red_text':''}}">{{is_collect?'已收藏':'收藏'}}</view>
+                    </view>
+                </view>
+                <view class="exit_botton" @tap="goto_seller({{goods_data.owner}})">
+                    查看卖家
+                </view>
+            </view>
+            <view class="bottom_exit message_bottom" wx:if="{{is_message}}">
+                <Swinput1 maxlength="80" placeholder='最多可以回复40个字哦' :value.sync='message_info'></Swinput1>
+                <view class="exit_botton" @tap="sent_message({{goods_data.owner}})">
+                    留言
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+
+<script>
+    import wepy from 'wepy';
+    import {
+        USER_INFO,
+        USER_SPECICAL_INFO,
+        USER_JWT,
+    } from "@/utils/constant";
+    import tip from "@/utils/tip";
+    import api from "@/api/api";
+    import Input from '@/components/Swinput';
+    export default class Example extends wepy.page {
+        config = {
+            navigationBarTitleText: "商品详情",
+        };
+        data = {
+            wxuserinfo: {},
+            goods_data: {},
+            goods_datacollect: {},
+            like: false,
+            message: false,
+            is_collect: false,
+            message_info: '',
+            is_message: false,
+            is_reply: false,
+            is_addlike: false,
+        };
+        components = {
+            Swinput1: Input, // 留言信息
+        };
+        methods = {
+            goto_seller(id) {
+                api.wxuserinfo({
+                    id: id
+                }).then(res => {
+                    if (res.is_showinfo) {
+                        wepy.navigateTo({
+                            url: '/pages/other_userdata?id='+id
+                        });
+                    }else{
+                        tip.alert("人家好害羞呢，不让看")
+                    }
+                })
+            },
+            addlikegoods() {
+                var params = {
+                    'add_like': this.goods_data.add_like + 1,
+                    'category': this.goods_data.category,
+                    'product_name': this.goods_data.product_name,
+                    'owner': this.goods_data.owner,
+                }
+                api.createProduct({
+                    id: this.goods_data.id,
+                    query: params,
+                    method: "put"
+                }).then(res => {
+                    this.is_addlike = true;
+                    tip.success("已赞")
+                    this.$apply()
+                })
+            },
+            collect_goods() {
+                if (this.is_collect) {
+                    tip.alert("已经收藏过了哦")
+                    return
+                } else {
+                    var params = {
+                        'user': this.wxuserinfo.id,
+                        'productid': this.goods_data.id,
+                        'product_price': this.goods_data.price,
+                        'product_owner': this.goods_data.owner_name,
+                        'product_ownerimage': this.goods_data.owner_image,
+                        'product_userinfo': this.goods_data.owner_info,
+                        'product_image': this.goods_data.product_image[0] + '+' + this.goods_data.product_image[1] + '+' + this.goods_data.product_image[2],
+                        'product_name': this.goods_data.product_name,
+                        'product_house': this.goods_data.owner_location,
+                    }
+                    api.collectProduct({
+                        query: params,
+                        method: "post"
+                    }).then(res => {
+                        this.is_collect = true;
+                        this.$apply()
+                        tip.toast("收藏成功");
+                    })
+                }
+            },
+            gotomessage() {
+                this.is_message = !this.is_message;
+                this.$apply()
+            },
+            sent_message(tap) {
+                if (this.is_reply) {
+                    tip.alert("已经回复过了哦")
+                }
+                if (this.message_info) {
+                    var params = {
+                        'otherid': this.wxuserinfo.id,
+                        'othername': this.wxuserinfo.name,
+                        'otherimage': this.wxuserinfo.image,
+                        'massage_info': this.message_info,
+                        'owner': tap,
+                    }
+                    api.createMessage({
+                        query: params,
+                        method: "post"
+                    }).then(res => {
+                        this.is_reply = true;
+                        this.is_message = false;
+                        this.$apply()
+                        tip.toast("回复成功");
+                    })
+                } else {
+                    tip.alert("请输入回复内容")
+                }
+            }
+        };
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad(ps) {
+            api.createProduct({
+                id: ps.id
+            }).then(res => {
+                if (res) {
+                    this.goods_data = res;
+                    let user_info = wepy.getStorageSync(USER_INFO);
+                    this.wxuserinfo = user_info;
+                    if (this.wxuserinfo.user_collection.length > 0) {
+                        for (var i = 0; i < this.wxuserinfo.user_collection.length; i++) {
+                            if (this.wxuserinfo.user_collection[i].product_name === this.goods_data.product_name) {
+                                this.is_collect = true;
+                            }
+                        }
+                        this.$apply()
+                    }
+                    this.goods_data.product_image = this.goods_data.product_image.split('+')
+                    this.$apply()
+                }
+            })
+        };
+        onShow() {
+            // let user_info = wepy.getStorageSync(USER_INFO);
+            // this.wxuserinfo = user_info;
+            // if (this.wxuserinfo.user_collection.length > 0) {
+            //     for (var i = 0; i < this.wxuserinfo.user_collection.length; i++) {}
+            // }
+            // this.$apply()
+        };
+    }
+</script>
+
+<style lang='scss'>
+    .goods_box {
+        width: 100%;
+        .sw_input {
+            input {
+                height: 100%;
+                width: 90%;
+                background: rgba(249, 249, 249, 0.8);
+                padding: 4rpx 20rpx;
+            }
+        }
+        .iconfont {
+            font-family: "iconfont" !important;
+            font-size: 16px;
+            font-style: normal;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            &.exit_iconfont {
+                font-size: 20px;
+            }
+        }
+        .goods_detail {
+            position: relative;
+            height: 100%;
+            padding: 0 30rpx;
+            .line_gray {
+                width: 100%;
+                height: 2rpx;
+                background: #E0E0E0;
+            }
+            .box_top {
+                height: 100rpx;
+                display: flex;
+                margin-bottom: 30rpx;
+                .avatar {
+                    width: 100rpx;
+                    border-radius: 10rpx;
+                    .image_avatar {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 10rpx;
+                    }
+                }
+                .name_box {
+                    font-size: 24rpx;
+                    font-family: SFProDisplay-Medium;
+                    font-weight: 500;
+                    color: #000000;
+                    padding-left: 30rpx;
+                    .user_name {
+                        margin-top: 20rpx;
+                        font-size: 26rpx;
+                    } // .user_interest {}
+                }
+            }
+            .price_text_img {
+                // background: gray;
+                .price_box {
+                    width: 100%;
+                    height: 80rpx;
+                    line-height: 80rpx;
+                    font-size: 40rpx;
+                    font-family: SFProDisplay-Medium;
+                    font-weight: 500;
+                    color: red;
+                }
+                .text_box {
+                    .detailed_introduct {
+                        font-size: 28rpx;
+                        font-family: PingFangSC-Regular;
+                        font-weight: 400;
+                        color: #888888;
+                    }
+                    .deal_way {
+                        height: 80rpx;
+                        line-height: 80rpx;
+                        font-size: 30rpx;
+                        font-family: PingFangSC-Regular;
+                        font-weight: 400;
+                        color: #272727;
+                    }
+                }
+                .image_box {
+                    width: 100%;
+                }
+            }
+        }
+        .bottom_exit {
+            position: fixed;
+            bottom: 0;
+            width: 690rpx;
+            padding: 0 30rpx 50rpx 0;
+            height: 80rpx;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            &.message_bottom {
+                bottom: 130rpx;
+                padding: 0;
+            }
+            .exit_infobox {
+                width: 70%;
+                display: flex;
+                justify-content: space-between;
+                .exit_info {
+                    width: 30%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .exit_text {
+                        font-size: 30rpx;
+                        font-family: PingFangSC-Regular;
+                        font-weight: 400;
+                        color: black;
+                        margin-left: 10rpx;
+                        &.red_text {
+                            color: rgba(209, 26, 45, 1);
+                            ;
+                        }
+                    }
+                }
+            }
+            .exit_botton {
+                width: 20%;
+                height: 70%;
+                line-height: 56rpx;
+                border-radius: 10rpx;
+                text-align: center;
+                background: #6A6AFF;
+                font-size: 30rpx;
+                font-family: PingFangSC-Regular;
+                font-weight: 400;
+                color: white;
+            }
+        }
+    }
+</style>

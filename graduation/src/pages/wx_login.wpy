@@ -1,0 +1,120 @@
+<template>
+    <view class="authorize-contianer">
+        <image class="authorize-icon" src="http://pqxf267y5.bkt.clouddn.com/20190401220230.png"></image>
+        <view class="auth-item">来这儿逛逛吧</view>
+        <view class="btn-authorize">
+            <button open-type="getUserInfo" type="primary" lang="zh_CN" bindgetuserinfo="onGotUserInfo">微信登录</button>
+        </view>
+        <image src="{{aaa}}"></image>
+    </view>
+</template>
+<script>
+    import wepy from "wepy";
+    import api from "@/api/api";
+    //   import check from "@/utils/check"
+    import {
+        SYSTEM_INFO,
+        USER_INFO,
+        USER_JWT,
+        ACCOUNT_INFO
+    } from "@/utils/constant";
+    export default class Authorize extends wepy.page {
+        config = {
+            navigationBarTitleText: "逛逛"
+        };
+        data = {
+            show: 'hidden',
+            userInfo: {},
+            avatarUrl: "",
+            nickName: '',
+            wx_login_res: {},
+        }
+        async onLoad() {}
+        async onGotUserInfo(e) {
+            if (e.detail.errMsg == "getUserInfo:ok") {
+                let userjwt = wepy.getStorageSync(USER_JWT) || "";
+                wepy.login({
+                    success: res => {},
+                    fail: () => {},
+                    complete: () => {}
+                }).then(res => {
+                    let rlt = api.wxLogin({
+                        method: "POST",
+                        query: {
+                            code: res.code,
+                            avatarUrl: e.detail.userInfo.avatarUrl,
+                            nickName: e.detail.userInfo.nickName,
+                            userInfo: e.detail.userInfo,
+                        }
+                    });
+                    rlt.then((rlt) => {
+                        // rlt 中有两个字段，其中一个是用户的JWt,另外一个是用户的ID:user_id
+                        if (rlt.JWT) {
+                            wepy.setStorageSync(USER_JWT, rlt.JWT);
+                            wepy.setStorageSync(ACCOUNT_INFO, rlt);
+                            // 把用户的id 写入到userinfo中
+                            e.detail.userInfo.id = rlt.user_id;
+                            wepy.setStorageSync(USER_INFO, e.detail.userInfo);
+                            let systemInfo = wepy.getSystemInfoSync();
+                            wepy.setStorageSync(SYSTEM_INFO, systemInfo);
+                            this.$parent.$wxapp.onLaunch()
+                            wepy.navigateBack({
+                                delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+                            });
+                        }
+                        wepy.navigateBack({
+                            delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+                        });
+                    })
+                })
+            } else {
+                wepy.navigateBack({
+                    delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+                });
+            }
+        }
+        async onShow() {}
+        methods = {};
+        events = {};
+    }
+</script>
+<style lang="less">
+    page {
+        height: 100%;
+    }
+    .authorize-contianer {
+        height: 100%;
+        background: #fff;
+        text-align: center;
+        padding-top: 100rpx;
+        .authorize-icon {
+            width: 130rpx;
+            height: 130rpx;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0px 0px 20rpx 0px rgba(0, 0, 0, 0.12);
+            border-radius: 24rpx;
+        }
+        .auth-item {
+            padding: 20rpx 0;
+            color: #C6C6C6
+        }
+        .btn-authorize {
+            margin: 100rpx 50rpx;
+            button {
+                height: 80rpx;
+                font-size: 36rpx;
+                font-family: PingFangSC-Medium;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 1);
+                line-height: 80rpx;
+                border: none;
+                border-radius: 0;
+            }
+            button::after {
+                border: none;
+                border-radius: 0;
+            }
+        }
+    }
+</style>

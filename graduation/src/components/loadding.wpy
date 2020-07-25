@@ -1,0 +1,138 @@
+<template>
+  <view id="loading-center" class="{{fullscreen=='true'&&'fullscreen'}}">
+    <view id="loading-center-absolute">
+      <view class="object"></view>
+      <view class="object"></view>
+      <view class="object"></view>
+      <!-- <view class="object"></view>
+            <view class="object"></view> -->
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from "wepy";
+  export default class Loading extends wepy.component {
+    props = {
+      fullscreen: {
+        type: String,
+        default: 'true'
+      }
+    }
+    data = {};
+    methods = {};
+    watch = {};
+    onLoad(){
+      // debugger
+    }
+  }
+</script>
+
+<style lang="less">
+  .fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+  }
+  #loading-center {
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 999;
+  }
+  #loading-center-absolute {
+    width: 200rpx;
+    height: 100rpx;
+    padding: 10rpx 0;
+    display: flex;
+    position:absolute;
+    top:50%;
+    left:50%;
+    margin:-50rpx -100rpx;
+  }
+  .object {
+    margin-top: 10rpx;
+    width: 24rpx;
+    height: 24rpx;
+    background-color: #D11A2D;
+    float: left;
+    margin: 0 auto;
+    border-radius: 50%;
+  }
+  .object:nth-child(3) {
+    animation: move3 1.5s infinite; // animation-delay: 3s;
+    animation-timing-function: ease-in-out	; // -webkit-animation-delay: 0.4s;
+    -webkit-animation-timing-function: ease-in-out;
+  }
+  .object:nth-child(2) {
+    animation: move2 1.5s infinite; // animation-delay: 1s;
+    animation-timing-function: ease-in-out	; // -webkit-animation-delay: 0.2s;
+    -webkit-animation-timing-function: ease-in-out;
+  }
+  .object:nth-child(1) {
+    animation: move1 1.5s infinite;
+    animation-timing-function: ease-in-out	;
+    -webkit-animation-timing-function: ease-in-out;
+  } 
+  // @-webkit-keyframes object {
+  //   50% {
+  //     -ms-transform: translate(0, -40rpx);
+  //     -webkit-transform: translate(0, -40rpx);
+  //     transform: translate(0, -40rpx);
+  //   }
+  // }
+  @keyframes move1 {
+    0% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+    16% {
+      -ms-transform: translate(0, -40rpx);
+      -webkit-transform: translate(0, -40rpx);
+      transform: translate(0, -40rpx);
+    }
+    30% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+  }
+  @keyframes move2 {
+    30% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      -ms-transform: translate(0, -40rpx);
+      -webkit-transform: translate(0, -40rpx);
+      transform: translate(0, -40rpx);
+    }
+    66% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+  }
+  @keyframes move3 {
+    60% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+    82% {
+      -ms-transform: translate(0, -40rpx);
+      -webkit-transform: translate(0, -40rpx);
+      transform: translate(0, -40rpx);
+    }
+    100% {
+      -ms-transform: translate(0, 0);
+      -webkit-transform: translate(0, 0);
+      transform: translate(0, 0);
+    }
+  }
+</style>
+

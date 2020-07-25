@@ -1,0 +1,69 @@
+<template>
+    <view class='cartnone' wx:if="{{isDisplay}}">
+        <view class="icon">
+            <i class="iconfont icon-liebiaokongzhuangtai icon_cart"></i>
+        </view>
+        <view class="tipup_cart">你还没有收藏的商品呢</view>
+        <view class="tipdown_cart">快去随便逛逛吧，说不定有惊喜呢！</view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy';
+    export default class Example extends wepy.component {
+        props = {
+            isDisplay: {
+                type: Boolean,
+                default: false
+            }
+        };
+        data = {};
+        components = {};
+        methods = {};
+        events = {};
+        watch = {};
+        computed = {};
+        onLoad() {};
+        onShow() {};
+    }
+</script>
+
+<style lang='scss'>
+    .cartnone {
+        width: 100%;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        .icon_cart {
+            font-size: 160px;
+        }
+        .icon {
+            width: 100%;
+            margin-top: 30%;
+            text-align: center;
+        }
+        .tipup_cart {
+            width: 100%;
+            text-align: center;
+            margin-top: 10rpx;
+            height: 50rpx;
+            font-size: 36rpx;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: #000000;
+            line-height: 50rpx;
+        }
+        .tipdown_cart {
+            width: 100%;
+            text-align: center;
+            margin-top: 10rpx;
+            height: 42rpx;
+            font-size: 30rpx;
+            font-family: PingFangSC-Regular;
+            font-weight: 400;
+            color: #888888;
+            line-height: 42rpx;
+        }
+    }
+</style>

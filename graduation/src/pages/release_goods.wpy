@@ -1,0 +1,449 @@
+<!--  -->
+<template>
+  <view class='release_goods'>
+    <view class="img_upload bottom_border_line">
+      <view class='top_text'>
+        <view>图片 {{fileList.length}}/9</view>
+        <view>* 图片上传不得小于3张 </view>
+      </view>
+      <view class='img_box'>
+        <SwUpload mainImage='0' :fileList.sync='fileList' :showRemove.sync='remove1' :showAdd.sync='remove' @success.user="imgSuccess" maxNumber='6'></SwUpload>
+      </view>
+    </view>
+    <view class='bottom_border_line product-name'>
+      <view class='text'>
+        <text>商品名称</text>
+        <text>{{bytes['1']}}/100</text>
+      </view>
+      <view class='ipt-box'>
+        <textarea disabled="{{disablePower}}" maxlength='200' auto-height value='{{title}}' bindinput='bindKeyInputTitle' placeholder="请输入商品名称"></textarea>
+      </view>
+    </view>
+    <view class='bottom_border_line use_people_box deposit-box left_right_padding'>
+      <view class='text'>
+        <text>商品类别</text>
+      </view>
+      <view class='text_radio'>
+        <radio-group class="radio-group" bindchange="crowdRadioChange">
+          <view class='product_source'>
+            <view wx:for='{{classiclist}}' wx:key='index'>
+              <label for='{{item.value}}'>
+                                  <radio class="radio" id='{{item.value}}' checked="{{crowd==item.value?true:''}}" value="{{item.value}}">
+                                  </radio>
+                                  <text>{{item.name}}</text>
+                              </label>
+            </view>
+          </view>
+        </radio-group>
+      </view>
+    </view>
+    <view class='bottom_border_line use_people_box deposit-box left_right_padding'>
+      <view class='text'>
+        <text>商品成色</text>
+      </view>
+      <view class='text_radio'>
+        <radio-group class="radio-group" bindchange="crowdRadioChange1">
+          <view class='product_source'>
+            <view wx:for='{{crowd_types}}' wx:key='index'>
+              <label for='{{item.value}}'>
+                                    <radio class="radio" id='{{item.value}}' checked="{{crowd==item.value?true:''}}" value="{{item.value}}">
+                                    </radio>
+                                    <text>{{item.label}}</text>
+                                </label>
+            </view>
+          </view>
+        </radio-group>
+      </view>
+    </view>
+    <view class='bottom_border_line seller-remarks'>
+      <view class='text'>
+        <text>商品详情</text>
+      </view>
+      <view class="ipt-box">
+        <textarea disabled="{{disablePower}}" maxlength='200' value='{{description}}' bindinput='bindKeyInput' placeholder="请详细描述您的宝贝，让大家更了解它，如：购买渠道、购买价格、出售原因、配件是否齐全等"></textarea>
+      </view>
+    </view>
+    <view class='bottom_border_line product-name'>
+      <view class='text'>
+        <text>交易方式</text>
+      </view>
+      <view class='ipt-box'>
+        <textarea disabled="{{disablePower}}" maxlength='200' auto-height value='{{trading_method}}' bindinput='bindKeyInputmethod' placeholder="请输入交易方式"></textarea>
+      </view>
+    </view>
+    <view class='bottom_border_line product-price'>
+      <view class='sell-price'>
+        <text>出售价格</text>
+      </view>
+      <view>
+        <view class="sell-ipt-box">
+          <view>
+            <text slot='before' class='iconfont icon-jinqian'></text>
+          </view>
+          <SwIput3 type='digit' :value.sync='price' rule='price' placeholder-class='sw-input-placeholder' placeholder="输入想出售的价格"></SwIput3>
+        </view>
+      </view>
+      <view class='get-price'>
+        <text>购买价格</text>
+      </view>
+      <view class='get-ipt-box'>
+        <view>
+          <text slot='before' class='iconfont icon-jinqian'></text>
+        </view>
+        <SwIput4 type='digit' :value.sync='raw_price' rule='price' placeholder-class='sw-input-placeholder' placeholder="输入商品原价" />
+      </view>
+    </view>
+    <view class="release_info" @tap="goto_release()">
+      确认发布
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import api from "@/api/api";
+  import {
+    USER_INFO,
+    USER_SPECICAL_INFO,
+    USER_JWT,
+  } from "@/utils/constant";
+  import tip from "@/utils/tip";
+  import SwIput from "@/components/Swinput";
+  import SwUpload from "@/components/upload";
+  export default class Example extends wepy.page {
+    config = {
+      navigationBarTitleText: "上传商品",
+    };
+    data = {
+      bytes: {
+        '1': 0
+      },
+      disablePower: false,
+      user_id: '',
+      wxuserinfo: {}, //用户信息缓存
+      fileList: [], //图片列表
+      fileimagelist: [], //七牛云图片地址
+      base_imageurl: 'http://pqxf267y5.bkt.clouddn.com/',
+      fileimageinfo: '', //图片总地址
+      title: "", //商品名称
+      crowd: 1, //商品种类
+      condition: 0, // 商品成色
+      trading_method: '', //交易方式
+      price: 0, //出售价格
+      raw_price: 0, //购买价格
+      description: '', //商品详情
+      crowd_types: [{
+        label: '全新',
+        value: 100
+      }, {
+        label: '九成新',
+        value: 99
+      }, {
+        label: '八成新',
+        value: 80
+      }, {
+        label: '其他',
+        value: 70
+      }, ],
+      classiclist: [{
+          name: '健身器材',
+          value: 1,
+        },
+        {
+          name: '专业数据',
+          value: 2,
+        },
+        {
+          name: '宿舍电器',
+          value: 3,
+        },
+        {
+          name: '各式衣服',
+          value: 4,
+        },
+        {
+          name: '美妆捡漏',
+          value: 5,
+        },
+        {
+          name: '游戏代练',
+          value: 6,
+        },
+        {
+          name: '大四甩卖',
+          value: 7,
+        },
+        {
+          name: '其他',
+          value: 8,
+        },
+      ],
+    };
+    components = {
+      SwIput1: SwIput, //商品名称
+      SwArea: SwIput, //卖家寄语
+      SwIput2: SwIput, //库存数量
+      SwIput3: SwIput, //售卖价格
+      SwIput4: SwIput, //买入价格
+      SwIput5: SwIput, //商品尺寸
+      SwIput6: SwIput, //开卖价格
+      SwIput7: SwIput, //一口价格
+      SwUpload: SwUpload, //图片上传
+    };
+    setByteLen(str, length) {
+      var len = 0;
+      var value = '';
+      for (var i = 0; i < str.length; i++) {
+        var a = str.charAt(i);
+        if (a.match(/[^\x00-\xff]/ig) != null) {
+          len += 2;
+        } else {
+          len += 1;
+        }
+        if (len <= length) {
+          value += str[i];
+        } else {
+          break;
+        }
+      }
+      return value;
+    }
+    getByteLen(val) {
+      var len = 0;
+      for (var i = 0; i < val.length; i++) {
+        var a = val.charAt(i);
+        if (a.match(/[^\x00-\xff]/ig) != null) {
+          len += 2;
+        } else {
+          len += 1;
+        }
+      }
+      return len;
+    }
+    methods = {
+      bindKeyInputTitle(e) {
+        var value = e.detail.value;
+        // 字符长度校验 一个汉字两个字符
+        value = this.setByteLen(value, 200);
+        this.bytes['1'] = Math.ceil(this.getByteLen(value) / 2);
+        this.title = value;
+        return value;
+      },
+      bindKeyInputmethod(e) {
+        // 交易方式
+        var value = e.detail.value;
+        this.trading_method = value;
+      },
+      bindKeyInput(e) {
+        // 商品详情
+        var value = e.detail.value;
+        this.description = value;
+      },
+      goto_release() {
+        for (var i = 0; i < this.fileList.length; i++) {
+          this.fileimagelist.push(this.fileList[i].response.key)
+        }
+        this.$apply()
+        for (var i = 0; i < this.fileimagelist.length; i++) {
+          var tesimage = this.base_imageurl + this.fileimagelist[i] + '+';
+          this.fileimageinfo = this.fileimageinfo + tesimage
+        }
+        var parms = {
+          'product_image': this.fileimageinfo,
+          'product_name': this.title,
+          'category': this.crowd,
+          'conditions': this.condition,
+          'remark': this.description,
+          'trading_method': this.trading_method,
+          'price': this.price,
+          'raw_price': this.raw_price,
+          'owner': this.wxuserinfo.id,
+          'owner_image': this.wxuserinfo.image,
+          'owner_info':this.wxuserinfo.info,
+          'owner_name': this.wxuserinfo.name,
+          'owner_location': this.wxuserinfo.location_house,
+        }
+        api.createProduct({
+          query: parms,
+          method: "post"
+        }).then(res => {
+          if (res) {
+            tip.success("发布成功")
+          }
+          wepy.navigateBack({
+            delta: 1 //返回的页面数，如果 delta 大于现有页面数，则返回到首页,
+          });
+        })
+      },
+      imgSuccess(res, fileList) {},
+      crowdRadioChange(e) {
+        var value = e.detail.value;
+        if (value != -1) {
+          this.crowd = value;
+        }
+        this.$apply()
+      },
+      crowdRadioChange1(e) {
+        var value = e.detail.value;
+        if (value != -1) {
+          this.condition = value;
+        }
+        this.$apply()
+      },
+    };
+    events = {};
+    watch = {};
+    computed = {
+      full_data() {
+        // if (!this.title) return false
+        if (!this.crowd) return false
+        if (!this.condition) return false
+        if (!this.description) return false
+        if (!this.trading_method) return false
+        if (!this.price) return false
+        if (!this.raw_price) return false
+        return true
+      }
+    };
+    onLoad() {};
+    onShow() {
+      let userjwt = wepy.getStorageSync(USER_JWT);
+      let user_info = wepy.getStorageSync(USER_INFO);
+      this.wxuserinfo = user_info;
+      this.$apply()
+    };
+  }
+</script>
+
+<style lang='scss'>
+  .release_goods {
+    // width: 100%;
+    height: 100%;
+    padding: 0 40rpx;
+    font-size: 26rpx;
+    font-weight: 400;
+    .img_upload {
+      min-height: 422rpx;
+      padding-bottom: 30rpx;
+      padding-top: 20rpx;
+      .top_text {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10rpx;
+        view {
+          color: #888888;
+        }
+      }
+    }
+    .product-name {
+      padding-top: 20rpx;
+      padding-bottom: 20rpx;
+      .ipt-box {
+        min-height: 60rpx;
+        padding: 12rpx;
+        background: #f9f9f9;
+        textarea {
+          min-height: 40rpx;
+          width: 100%;
+          background: #f9f9f9; // padding: 12rpx;
+          box-sizing: border-box;
+        }
+      }
+      .text {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8rpx;
+        text:last-child {
+          color: #888;
+        }
+      }
+    }
+    .seller-remarks {
+      padding-top: 18rpx;
+      padding-bottom: 20rpx;
+      .text {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8rpx;
+        text:last-child {
+          color: #888;
+        }
+      }
+      .ipt-box {
+        position: relative;
+        width: 100%;
+        height: 280rpx;
+      }
+      textarea {
+        width: 100%;
+        height: 100%;
+        background: #f9f9f9;
+        padding: 12rpx;
+        box-sizing: border-box;
+      }
+    }
+    .product-price {
+      padding-top: 10rpx;
+      .sell-price {
+        margin-bottom: 10rpx;
+        text {
+          font-weight: 500;
+        }
+      }
+      .get-price {
+        margin-bottom: 10rpx;
+      }
+      .sell-ipt-box {
+        width: 100%;
+        height: 60rpx;
+        margin-bottom: 20rpx;
+        display: flex;
+        view:first-child {
+          background: #f9f9f9;
+          width: 46rpx;
+          padding-left: 22rpx;
+          line-height: 60rpx;
+          color: #888;
+          font-size: 28rpx;
+        }
+      }
+      .get-ipt-box {
+        width: 100%;
+        height: 60rpx;
+        margin-bottom: 20rpx;
+        display: flex;
+        view:first-child {
+          background: #f9f9f9;
+          width: 46rpx;
+          padding-left: 22rpx;
+          line-height: 60rpx;
+          color: #888;
+          font-size: 28rpx;
+        }
+      }
+      .fund-color input {
+        color: #C6C6C6;
+      }
+    }
+    .use_people_box {
+      .radio-group {
+        justify-content: flex-start !important;
+      }
+    }
+    .bottom_border_line {
+      border-bottom: 2rpx solid #e5e5e5;
+    }
+    .release_info {
+      width: 70%;
+      height: 80rpx;
+      border-radius: 30rpx;
+      background: #6A6AFF;
+      text-align: center;
+      line-height: 80rpx;
+      color: #fff;
+      margin: 0 auto;
+      margin-bottom: 60rpx;
+      margin-top: 60rpx;
+    }
+  }
+</style>

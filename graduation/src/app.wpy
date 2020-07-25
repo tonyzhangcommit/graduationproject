@@ -1,0 +1,113 @@
+<style lang="less">
+  // .container {
+  //   height: 100%;
+  //   display: flex;
+  //   flex-direction: column;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   box-sizing: border-box;
+  // }
+  @import "./styles/icon";
+</style>
+
+<script>
+  import wepy from 'wepy'
+  import 'wepy-async-function'
+  import {
+    setStore
+  } from 'wepy-redux'
+  import configStore from './store'
+  const store = configStore()
+  setStore(store)
+  export default class extends wepy.app {
+    config = {
+      pages: [
+        'pages/home',
+        'pages/search_info',
+        'pages/goods_detail',
+        'pages/home_search',
+        'pages/other_userdata',
+        'pages/classify',
+        'pages/collection',
+        'pages/info',
+        'pages/edit_userdata',
+        'pages/show_userdata',
+        'pages/setting_page',
+        'pages/release_goods',
+        'pages/wx_login',
+      ],
+      window: {
+        backgroundTextStyle: 'light',
+        navigationBarBackgroundColor: '#fff',
+        navigationBarTitleText: '逛逛',
+        navigationBarTextStyle: 'black',
+      },
+      tabBar: {
+        color: '#E0E0E0',
+        selectedColor: '#EA0000',
+        backgroundColor: '#ffffff',
+        list: [{
+            pagePath: 'pages/home',
+            text: '首页',
+            iconPath: 'images/tabbar_icon_home_def.png',
+            selectedIconPath: 'images/tabbar_icon_home_pre.png'
+          },
+          {
+            pagePath: 'pages/collection',
+            text: '我的收藏',
+            iconPath: 'images/tabbar_icon_coll_def.png',
+            selectedIconPath: 'images/tabbar_icon_coll_pre.png'
+          },
+          {
+            pagePath: 'pages/info',
+            text: '我的',
+            iconPath: 'images/tabbar_icon_my_def.png',
+            selectedIconPath: 'images/tabbar_icon_my_pre.png'
+          }
+        ]
+      }
+    }
+    globalData = {
+      // userInfo: null,
+      errImg: '../images/zhanweitu.png',
+      is_ipx: false, //iPhone x 适配
+      systemInfo: wx.getSystemInfo(),
+      imData: {
+        isLogin: false, // 是否正在登陆
+        isRegister: false, // 是否正在注册
+        userInfo: {}, // 登录用户信息
+      },
+    }
+    constructor() {
+      super()
+      this.use('requestfix');
+      this.use("promisify");
+    }
+    onLaunch() {
+      this.testAsync()
+    }
+    sleep(s) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve('promise resolved')
+        }, s * 1000)
+      })
+    }
+    async testAsync() {
+      const data = await this.sleep(3)
+      console.log(data)
+    }
+    getUserInfo(cb) {
+      const that = this
+      if (this.globalData.userInfo) {
+        return this.globalData.userInfo
+      }
+      wepy.getUserInfo({
+        success(res) {
+          that.globalData.userInfo = res.userInfo
+          cb && cb(res.userInfo)
+        }
+      })
+    }
+  }
+</script>

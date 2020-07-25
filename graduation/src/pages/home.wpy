@@ -1,0 +1,561 @@
+
+<template>
+  <view class="container">
+    <view class="search_box">
+      <view class="search" @tap="goto_search()">
+        <i class="iconfont icon-icon-search icon_search" />
+        <view class="search_text">嘿！朋友，快来逛逛吧</view>
+      </view>
+    </view>
+    <view style=" margin:0 auto;">
+      <swiper class="home-top-swiper" previous-margin="40rpx" indicator-dots="true" indicator-color="rgba(255,255,255,0.5)" autoplay="true" next-margin="40rpx" indicator-active-color="rgba(255,255,255,0.9)" circular="true">
+        <block wx:for="{{block_1}}" wx:key="{{index}}">
+          <swiper-item @tap="goto_carouselinfo()">
+            <image src="{{item.src}}" class="slide-image" data-wpygotoadvert-a="{{item.advertUrl}}"></image>
+          </swiper-item>
+        </block>
+      </swiper>
+    </view>
+    <view class="classic_list">
+      <view class="title-box" style="width:100%;margin-left:0;">
+        <text class="title">商品分类</text>
+      </view>
+    </view>
+    <scroll-view scroll-x scroll-with-animation style="white-space: nowrap;">
+      <view style="display:inline-block" wx:for="{{classiclist}}" wx:key="{{index}}">
+        <view class="classicinfo">
+          <view class="classic_img_name" @tap="goto_classic({{item.name}})">
+            <view class="image-box">
+              <image class="image" src="{{item.src}}"></image>
+            </view>
+            <view class="classicnamebox">{{item.name}}</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="goods_list">
+      <view class="title-box" style="margin-top:40rpx;">
+        <text class="title">来这逛逛</text>
+      </view>
+      <view class="classic_new">
+        <view class="classic_newname {{index==control_red?'red_name':''}}" wx:for="{{newnamelist}}" wx:key="{{index}}" @tap="select_sort({{index}})">
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+    <!-- 商品列表详情 -->
+    <view class='goods_listbox'>
+      <view class="left_list">
+        <view class="goods_listinfo" wx:for="{{goods_left_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+          <view class="goods_image">
+            <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+          </view>
+          <view class="goods_text">{{item.product_name}}</view>
+          <view class="goods_price">￥ {{item.price}}</view>
+          <view class="goods_line"></view>
+          <view class="goodsbox_top">
+            <view class="avatar">
+              <image class="image_avatar" src="{{item.owner_image}}"></image>
+            </view>
+            <view class="name_box">
+              <view class="user_name">{{item.owner_name}}</view>
+              <view class="user_interest">{{item.owner_location}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="right_list">
+        <view class="goods_listinfo" wx:for="{{goods_right_list}}" wx:key="{{index}}" @tap="goto_goodsinfo({{item.id}})">
+          <view class="goods_image">
+            <image class="goods_image" mode="widthFix" src="{{item.image_big}}"></image>
+          </view>
+          <view class="goods_text">{{item.product_name}}</view>
+          <view class="goods_price">￥ {{item.price}}</view>
+          <view class="goods_line"></view>
+          <view class="goodsbox_top">
+            <view class="avatar">
+              <image class="image_avatar" src="{{item.owner_image}}"></image>
+            </view>
+            <view class="name_box">
+              <view class="user_name">{{item.owner_name}}</view>
+              <view class="user_interest">{{item.owner_location}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <!-- 发布按钮 -->
+    <view class="release_button" @tap="goto_release_page()">
+      <i class="iconfont icon-jiahao icon_add"></i>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import {
+    USER_INFO,
+    USER_SPECICAL_INFO,
+    USER_JWT,
+  } from "@/utils/constant";
+  import api from "@/api/api";
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '逛逛'
+    }
+    components = {}
+    data = {
+      wxuserinfo: {},
+      no_login: false,
+      control_red: 0,
+      goods_list: [],
+      goods_left_list: [],
+      goods_right_list: [],
+      block_1: [{
+          'src': "http://img.pconline.com.cn/images/upload/upc/tx/photoblog/1612/20/c0/32837534_1482165266094_mthumb.jpg"
+        },
+        {
+          'src': "http://n.sinaimg.cn/sinacn23/214/w2048h1366/20180519/3c59-haturfs9380682.jpg"
+        },
+        {
+          'src': "http://youimg1.c-ctrip.com/target/100m0r000000h8vi8E4EA.jpg"
+        },
+      ],
+      classiclist: [{
+          'src': "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1554729150&di=bca029eeb462f3b7f457fb0175d4150b&imgtype=jpg&er=1&src=http%3A%2F%2Fimg.sccnn.com%2Fbimg%2F338%2F16332.jpg",
+          'name': '健身器材'
+        },
+        {
+          'src': "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1976647487,3510069091&fm=26&gp=0.jpg",
+          'name': '专业书籍'
+        },
+        {
+          'src': "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1554729300&di=cb839582829e49b6755ea003662ef278&imgtype=jpg&er=1&src=http%3A%2F%2Fimg02.tooopen.com%2Fdowns%2Fimages%2F2010%2F7%2F19%2Fsy_20100719214427917122.jpg",
+          'name': '宿舍电器'
+        },
+        {
+          'src': "http://www.tianqi.com/images/0-18-1.jpg",
+          'name': '各式衣服'
+        },
+        {
+          'src': "http://img4.imgtn.bdimg.com/it/u=1435345231,1893023499&fm=26&gp=0.jpg",
+          'name': '美妆捡漏'
+        },
+        {
+          'src': "http://img1.imgtn.bdimg.com/it/u=104912722,1998917757&fm=26&gp=0.jpg",
+          'name': '游戏代练'
+        },
+        {
+          'src': "http://i1.sinaimg.cn/dy/o/2011-08-08/1312765001_35op79.jpg",
+          'name': '大四甩卖'
+        },
+        {
+          'src': "http://wx3.sinaimg.cn/wap720/006ij2XRgy1fcum9d5wunj310x0kujsg.jpg",
+          'name': '其他'
+        },
+      ],
+      newnamelist: [{
+          'name': "最近发布"
+        },
+        {
+          'name': "浏览最多"
+        },
+        {
+          'name': "最受欢迎"
+        },
+      ],
+    }
+    computed = {}
+    methods = {
+      goto_search() {
+        wepy.navigateTo({
+          url: '/pages/home_search'
+        });
+      },
+      goto_classic(tap) {
+        wepy.navigateTo({
+          url: '/pages/classify?title=' + tap
+        });
+      },
+      goto_goodsinfo(id) {
+        wepy.navigateTo({
+          url: '/pages/goods_detail?id=' + id
+        });
+      },
+      select_sort(it) {
+        this.control_red = it;
+        if (it == 0 && this.goods_list[0].id < this.goods_list[1].id) {
+          this.goods_list = this.goods_list.reverse();
+          if (this.goods_list.length > 0) {
+            for (var j = 0; j < this.goods_list.length; j++) {
+              var imagefirst = this.goods_list[j].product_image.split('+')[0];
+              this.goods_list[j].image_big = imagefirst
+            }
+            this.goods_left_list = [];
+            this.goods_right_list = [];
+            for (var i = 0; i < this.goods_list.length; i++) {
+              if (i % 2 == 0) {
+                this.goods_left_list.push(this.goods_list[i])
+              } else {
+                this.goods_right_list.push(this.goods_list[i])
+              }
+            }
+          }
+        } else if (it > 0) {
+          api.createProduct().then(res => {
+            this.goods_list = res;
+            if (this.goods_list.length > 0) {
+              for (var j = 0; j < this.goods_list.length; j++) {
+                var imagefirst = this.goods_list[j].product_image.split('+')[0];
+                this.goods_list[j].image_big = imagefirst
+              }
+              this.goods_left_list = [];
+              this.goods_right_list = [];
+              for (var i = 0; i < this.goods_list.length; i++) {
+                if (i % 2 == 0) {
+                  this.goods_left_list.push(this.goods_list[i])
+                } else {
+                  this.goods_right_list.push(this.goods_list[i])
+                }
+              }
+            }
+          })
+        }
+        this.$apply()
+      },
+      goto_release_page() {
+        if (this.no_login) {
+          wepy.navigateTo({
+            url: "/pages/wx_login"
+          });
+        } else if (this.wxuserinfo.school_number) {
+          wepy.navigateTo({
+            url: '/pages/release_goods'
+          });
+        } else {
+          wx.showModal({
+            title: '提示',
+            content: "为了您和他人的合法权益，请先完善用户详细信息",
+            success: (res) => {
+              if (res.confirm) {
+                wepy.navigateTo({
+                  url: '/pages/edit_userdata'
+                });
+              } else {
+                console.log('用户点击取消')
+              }
+            }
+          })
+        }
+      }
+    }
+    events = {}
+    onLoad() {}
+    onShow() {
+      // 验证登录
+      let userjwt = wepy.getStorageSync(USER_JWT);
+      let user_info = wepy.getStorageSync(USER_INFO);
+      this.wxuserinfo = user_info;
+      if (userjwt) {
+        this.no_login = false;
+        api.wxuserinfo({
+          id: this.wxuserinfo.id
+        }).then(res => {
+          if (res) {
+            // 更新缓存
+            this.wxuserinfo = res;
+            wx.removeStorageSync(USER_INFO)
+            wepy.setStorageSync(USER_INFO, res);
+            this.$apply()
+          }
+        })
+      } else {
+        this.no_login = true;
+      }
+      this.$apply()
+      // 获取首页商品列表
+      api.createProduct().then(res => {
+        this.goods_list = res;
+        // this.goods_list = this.goods_list.reverse();
+        // debugger
+        if (this.goods_list.length > 0) {
+          for (var j = 0; j < this.goods_list.length; j++) {
+            var imagefirst = this.goods_list[j].product_image.split('+')[0];
+            this.goods_list[j].image_big = imagefirst
+          }
+          this.goods_left_list = [];
+          this.goods_right_list = [];
+          for (var i = 0; i < this.goods_list.length; i++) {
+            if (i % 2 == 0) {
+              this.goods_left_list.push(this.goods_list[i])
+            } else {
+              this.goods_right_list.push(this.goods_list[i])
+            }
+          }
+        }
+      })
+    }
+  }
+</script>
+
+<style lang="less">
+  .container {
+    width: 100%;
+    .iconfont {
+      font-family: "iconfont" !important;
+      font-size: 32rpx;
+      font-style: normal;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      &.icon_search {
+        font-size: 34rpx;
+        color: rgba(136, 136, 136, 1);
+      }
+      &.icon_add {
+        font-size: 41px;
+        color: white;
+      }
+    }
+    .release_button {
+      width: 100rpx;
+      height: 100rpx;
+      border-radius: 50%;
+      background: #d0d0d0;
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      bottom: 30rpx;
+      left: 0%;
+      right: 0%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .title-box {
+      position: relative;
+      margin-left: 32rpx;
+      .title {
+        font-size: 14px;
+        font-family: PingFangSC-Medium;
+        font-weight: 500;
+        color: #000000;
+        line-height: 22px;
+        height: 22px;
+        display: block;
+      }
+      &:before {
+        content: " ";
+        display: block;
+        float: left;
+        width: 2px;
+        height: 18px;
+        background: #d11a2d;
+        border-radius: 2px;
+        margin-right: 5px;
+        margin-top: 2px;
+      }
+    }
+    .search_box {
+      margin-top: 20rpx;
+      margin-bottom: 40rpx;
+      height: 60rpx;
+      display: flex;
+      justify-content: center;
+      .search {
+        height: 100%;
+        width: 85%;
+        background: #f2f2f2;
+        border-radius: 50rpx;
+        display: flex;
+        align-items: center;
+        padding: 0 20rpx;
+        .search_text {
+          margin-left: 10rpx;
+          font-size: 28rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 400;
+          color: rgba(136, 136, 136, 1);
+        }
+      }
+    }
+    .home-top-swiper {
+      width: 100%;
+      height: 280rpx;
+      text-align: center;
+      .slide-image {
+        width: 650rpx;
+        height: 280rpx;
+      }
+    }
+    .classic_list {
+      margin-top: 10rpx;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 20rpx 32rpx;
+    }
+    .classicinfo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200rpx;
+      width: 170rpx;
+      margin-top: 10rpx;
+      .classic_img_name {
+        text-align: center;
+        width: 112rpx;
+        max-width: 144rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        .image-box .image {
+          height: 112rpx;
+          width: 112rpx;
+          border-radius: 50%;
+        }
+        .classicnamebox {
+          width: 100%;
+          text-align: center;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-size: 26rpx;
+          font-family: PingFangSC-Medium;
+          font-weight: 500;
+          color: #000000;
+          line-height: 36rpx;
+        }
+      }
+    }
+    .goods_list {
+      .classic_new {
+        padding: 0 100rpx;
+        display: flex;
+        justify-content: space-between;
+        .classic_newname {
+          margin-top: 30rpx;
+          width: 130rpx;
+          height: 48rpx;
+          background: #e5e5e5;
+          color: #C6C6C6;
+          border-radius: 200rpx;
+          font-size: 13px;
+          font-family: PingFangSC-Regular;
+          font-weight: 400;
+          line-height: 48rpx;
+          text-align: center;
+          &.red_name {
+            background: #d11a2d;
+            color: white;
+          }
+        } // .classic_newname:first-child {
+        //   background: #d11a2d;
+        //   color: white;
+        // }
+      }
+    }
+    .goods_listbox {
+      height: 100%;
+      padding: 60rpx 30rpx;
+      justify-content: space-between;
+      background: #FCFCFC;
+      display: flex;
+      flex-wrap: wrap;
+      .left_list {
+        width: 330rpx;
+        display: inline-block;
+      }
+      .right_list {
+        width: 330rpx;
+        display: inline-block;
+      }
+      .goods_listinfo {
+        width: 330rpx;
+        margin-bottom: 30rpx;
+        border-radius: 20rpx;
+        background: white;
+        display: flex;
+        flex-wrap: wrap;
+        .goods_image {
+          width: 330rpx;
+          max-height: 600rpx;
+          border-radius: 20rpx;
+        }
+        .goods_text {
+          max-height: 80rpx;
+          padding: 10rpx 0;
+          white-space: normal;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          width: 100%;
+          overflow: hidden;
+          font-size: 30rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 400;
+          color: #272727;
+        }
+        .goods_price {
+          height: 60rpx;
+          font-size: 30rpx;
+          font-family: PingFangSC-Regular;
+          font-weight: 500;
+          color: #EA0000;
+        }
+        .goods_line {
+          width: 100%;
+          height: 2rpx;
+          background: red;
+        }
+        .goodsbox_top {
+          width: 100%;
+          height: 100rpx;
+          align-items: center;
+          display: flex;
+          .avatar {
+            width: 80rpx;
+            height: 80rpx;
+            border-radius: 10rpx;
+            .image_avatar {
+              width: 80rpx;
+              height: 80rpx;
+              border-radius: 10rpx;
+            }
+          }
+          .name_box {
+            flex-grow: 1;
+            height: 80rpx;
+            font-size: 24rpx;
+            font-family: SFProDisplay-Medium;
+            font-weight: 500;
+            color: #000000;
+            padding-left: 20rpx;
+            .user_name {
+              height: 40rpx;
+              font-size: 26rpx;
+              white-space: normal;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .user_interest {
+              height: 40rpx;
+              white-space: normal;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+          .price {
+            margin-left: 20rpx;
+            text-align: right;
+            line-height: 100rpx;
+            font-size: 40rpx;
+            font-family: SFProDisplay-Medium;
+            font-weight: 500;
+            color: red;
+          }
+        }
+      }
+    }
+  }
+</style>
